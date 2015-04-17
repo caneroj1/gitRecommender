@@ -18,9 +18,11 @@ public class Driver extends WebRequest {
 		page.print("<div class='row-fluid'>");
 		page.print("<div class='col-md-12'>");
 		page.print("<h1 class='text-center'>Git Recommender</h1>");
+		page.print("<a href=\"#\" class=\"btn btn-primary btn-large\"><i class=\"icon-white icon-ok-sign\"></i> It Works!</a>");
 		page.print("</div>");
 		page.print("</div>");
 		page.print("</div>");
 		page.print(returnFooter());
+		
 	}
 }
