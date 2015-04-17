@@ -24,7 +24,7 @@ public class WebRequest extends HttpServlet{
 		header.write("<html lang=\"en\">\n");
         header.write("<head><title>Git Recommender</title>\n");
         header.write("<meta charset=\"utf-8\">\n");
-        header.write("<link rel=\"stylesheet\" href=\"https://raw.githubusercontent.com/thomaspark/bootswatch/gh-pages/paper/bootstrap.min.css\"></head>\n");
+        header.write("<link rel=\"stylesheet\" href=\"http://maxcdn.bootstrapcdn.com/bootswatch/3.3.4/paper/bootstrap.min.css\"></head>\n");
         header.write("<body>\n");
         
         return header.toString();
