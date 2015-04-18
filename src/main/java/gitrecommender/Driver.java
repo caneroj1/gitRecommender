@@ -2,10 +2,13 @@ package gitrecommender;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.HashMap;
+
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.kohsuke.github.*;
 
 @SuppressWarnings("serial")
@@ -28,6 +31,10 @@ public class Driver extends WebRequest {
 		page.print("</div>");
 		page.print("</div>");
 		page.print(returnFooter());
-		System.out.println(Recommender.computeUserAverageLanguageRank(gh.getUser("kbohinski"), pubRepoCount));
+		
+		HashMap<String, Double> myRank = Recommender.computeUserAverageLanguageRank(gh.getUser("kbohinski"), pubRepoCount);
+		HashMap<String, Double> targetRank = Recommender.computeLanguageRank(gh.getRepository("caneroj1/dojob"));
+		int distance = Recommender.computeLanguageDistance(myRank, targetRank);
+		System.out.println(distance);
 	}
 }
