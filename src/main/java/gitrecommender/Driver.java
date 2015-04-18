@@ -28,6 +28,6 @@ public class Driver extends WebRequest {
 		page.print("</div>");
 		page.print("</div>");
 		page.print(returnFooter());
-		
+		System.out.println(Recommender.computeUserAverageLanguageRank(gh.getUser("kbohinski"), pubRepoCount));
 	}
 }
