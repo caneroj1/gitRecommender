@@ -42,15 +42,15 @@ public class Recommender {
 	}
 	
 	/* computes the average language rank of a given user.
-	The average language rank for a user is kind of similar to the language rank for a repository. What this method will do
-	is total the percentage number of bytes written in each language across all of the user's public repos and then divide each
-	running total by the number of repos.
-	For example, suppose our user has two repos with the following ranks:
-	{ ruby = 0.5, javascript= 0.25, html = 0.25 }	
-	{ ruby = 0.2, javascript= 0.3, html = 0.5 }
+		The average language rank for a user is kind of similar to the language rank for a repository. What this method will do
+		is total the percentage number of bytes written in each language across all of the user's public repos and then divide each
+		running total by the number of repos.
+		For example, suppose our user has two repos with the following ranks:
+		{ ruby = 0.5, javascript= 0.25, html = 0.25 }	
+		{ ruby = 0.2, javascript= 0.3, html = 0.5 }
 	
-	We would then need to divide the totals of each language by 2, so the average language rank would be
-	{ ruby = 0.35, javascript= .275, html = 0.325 }	
+		We would then need to divide the totals of each language by 2, so the average language rank would be
+		{ ruby = 0.35, javascript= .275, html = 0.325 }	
 */
 	public static HashMap<String, Double> computeUserAverageLanguageRank(GHUser user, int publicRepoCount) throws IOException {
 		HashMap<String, Double> averageLanguageRank = new HashMap<String, Double>();
@@ -66,6 +66,36 @@ public class Recommender {
 		}
 		
 		return averageLanguageRank;
+	}
+	
+	/* this method will compute the distance between the user's language rank and the language rank of a target repo. 
+	 	the distance will be defined as the manhattan distance between languages. So basically, we just check the two hashes
+	 	and if the key exists in both hashes then we get the distance for that language as |userNumber - targetNumber|. 
+	 	if the key exists in one hash but not the other, then we just add the rank for that language.
+	 	Finally, we multiply the sum of all the ranks by 50 to get it between 0 and 100.
+	 */
+	public static int computeLanguageDistance(HashMap<String, Double> userRank, HashMap<String, Double> targetRank) {
+		Double runningSum = 0.0;
+		
+		for(String language : userRank.keySet().toArray(new String[0])) {
+			Number userNumber = userRank.remove(language);
+
+			if(targetRank.containsKey(language)) {
+				Number targetNumber = targetRank.remove(language);
+				runningSum += Math.abs(userNumber.doubleValue() - targetNumber.doubleValue());
+			}
+			else {
+				runningSum += userNumber.doubleValue();
+			}
+		}
+		
+		for(String language : targetRank.keySet().toArray(new String[0])) {
+			Number targetNumber = targetRank.remove(language);
+			runningSum += targetNumber.doubleValue();
+		}
+		
+		runningSum *= 50;
+		return runningSum.intValue();
 	}
 	
 	// merges two hash maps. it adds values from the two hashes if both hashes have the corresponding key, otherwise we just
