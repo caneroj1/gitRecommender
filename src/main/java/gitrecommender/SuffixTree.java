@@ -11,7 +11,7 @@ public class SuffixTree {
     SuffixTreeNode traversalNode = rootNode;
     int position;
 
-    for (char character : word.toCharArray()) {
+    for (char character : word.toUpperCase().toCharArray()) {
       position = (int) character;
       if (!traversalNode.isCharSet(position)) {
         traversalNode.setCharAt(position);
@@ -26,7 +26,7 @@ public class SuffixTree {
     SuffixTreeNode traversalNode = rootNode;
     int position;
 
-    for (char character : word.toCharArray()) {
+    for (char character : word.toUpperCase().toCharArray()) {
       position = (int) character;
 
       if (traversalNode.isCharSet(position)) {
