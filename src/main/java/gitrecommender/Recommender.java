@@ -1,16 +1,45 @@
 package gitrecommender;
 
-import java.io.IOException;
-import java.util.ArrayList;
+import java.net.*;
+import java.io.*;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+
 import org.kohsuke.github.*;
 
-import com.sun.xml.internal.bind.v2.schemagen.xmlschema.List;
-
 public class Recommender {
+	/* reads the readme for the specified repository.
+	 	right now it pretty much just prints out the readme.
+	 	for the future, i want to regex out anything that isn't a letter or a number, so those can
+	 	be put in the suffix tree.
+	 */
+	public static void analyzeReadme(GHRepository repository) throws IOException {
+		GHContent readme = repository.getReadme();
+		SuffixTree suffixTree = new SuffixTree();
+		String readmeURL = readme.getDownloadUrl();
+		URL readmeUrl = new URL(readmeURL);
+		URLConnection readmeConnection = readmeUrl.openConnection();
+		BufferedReader readmeReader = new BufferedReader(new InputStreamReader(readmeConnection.getInputStream()));
+		
+		String inputLine;
+		while ((inputLine = readmeReader.readLine()) != null) {
+			for(String token : inputLine.replaceAll("\\W", " ").split(" ")) {
+				System.out.println("Adding " + token);
+				suffixTree.addWord(token);
+			}
+			System.out.println(inputLine);
+		}
+		System.out.println("Looking for 'lawncare'.");
+		System.out.println(suffixTree.findWord("lawncare"));
+		System.out.println("Looking for 'tutoring'.");
+		System.out.println(suffixTree.findWord("tutoring"));
+		System.out.println("Looking for 'tutoringnot'.");
+		System.out.println(suffixTree.findWord("tutoringnot"));
+		readmeReader.close();
+	}
+	
 	/* computes the language rank of a given repo.
 		The language rank of a repo is basically what percentage of the total bytes written for a repo
 		each language constitutes. For example, if there were 20 bytes written total for a repo, and ruby makes up 10,
@@ -29,15 +58,12 @@ public class Recommender {
 			totalBytes += temp.longValue();
 		}
 		
-		System.out.println("Total bytes: " + totalBytes);
-		
 		// for each language, determine the percentage
 		for(String language : languages.keySet().toArray(new String[0])) {
 			Number temp = languages.get(language);
 			languageRank.put(language, (temp.doubleValue() / totalBytes));
 		}
-		
-		System.out.println(languageRank);
+	
 		return languageRank;
 	}
 	
@@ -74,9 +100,10 @@ public class Recommender {
 	 	if the key exists in one hash but not the other, then we just add the rank for that language.
 	 	Finally, we multiply the sum of all the ranks by 50 to get it between 0 and 100.
 	 */
-	public static int computeLanguageDistance(HashMap<String, Double> userRank, HashMap<String, Double> targetRank) {
+	public static int computeLanguageDistance(HashMap<String, Double> userRankToCopy, HashMap<String, Double> targetRank) {
 		Double runningSum = 0.0;
 		
+		HashMap<String, Double> userRank = new HashMap<String, Double>(userRankToCopy);
 		for(String language : userRank.keySet().toArray(new String[0])) {
 			Number userNumber = userRank.remove(language);
 
