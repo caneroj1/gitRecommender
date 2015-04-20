@@ -11,11 +11,18 @@ import org.kohsuke.github.*;
 
 public class Recommender {
 	/* reads the readme for the specified repository.
-	 	right now it pretty much just prints out the readme.
-	 	for the future, i want to regex out anything that isn't a letter or a number, so those can
-	 	be put in the suffix tree.
+	 	for each line it reads, it regexes out all non-word characters, leaving only a-zA-Z0-9 while replacing all instances
+	 	of unwanted characters with spaces. next, it splits the string by space, and adds all the resulting words to the suffix tree.
+	 	next, the algorithm uses the keywords passed in to determine the percentage of keywords that a repository has and ranks it.
+	 	the keywords array should be in order of preference, with the presence of each keyword mapping to a score of:
+	 	1st - 36
+	 	2nd - 28
+	 	3rd - 20
+	 	4th - 12
+	 	5th - 4
+	 	the total of these scores - 100 is the rank of the repository in terms of keyword matches
 	 */
-	public static void analyzeReadme(GHRepository repository) throws IOException {
+	public static int analyzeReadme(GHRepository repository, String[] keywords) throws IOException {
 		GHContent readme = repository.getReadme();
 		SuffixTree suffixTree = new SuffixTree();
 		String readmeURL = readme.getDownloadUrl();
@@ -26,18 +33,20 @@ public class Recommender {
 		String inputLine;
 		while ((inputLine = readmeReader.readLine()) != null) {
 			for(String token : inputLine.replaceAll("\\W", " ").split(" ")) {
-				System.out.println("Adding " + token);
 				suffixTree.addWord(token);
 			}
-			System.out.println(inputLine);
 		}
-		System.out.println("Looking for 'lawncare'.");
-		System.out.println(suffixTree.findWord("lawncare"));
-		System.out.println("Looking for 'tutoring'.");
-		System.out.println(suffixTree.findWord("tutoring"));
-		System.out.println("Looking for 'tutoringnot'.");
-		System.out.println(suffixTree.findWord("tutoringnot"));
 		readmeReader.close();
+		
+		int[] scores = { 36, 28, 20, 12, 4 };
+		int repositoryScore = 0;
+		for(int i = 0; i < 5; i++) {
+			if(suffixTree.findWord(keywords[i])) {
+				repositoryScore += scores[i];
+			}
+		}
+		
+		return (100 - repositoryScore);
 	}
 	
 	/* computes the language rank of a given repo.
