@@ -10,6 +10,14 @@ import java.util.Map;
 import org.kohsuke.github.*;
 
 public class Recommender {
+	
+	/* this is just the function where we compute the total distance that a repository is from the user.
+	 	right now it doesn't do much, but maybe we can tweak some weights or something in here.
+	 */
+	public static int overallDistance(int readmeDistance, int languageDistance) {
+		return readmeDistance + languageDistance;
+	}
+	
 	/* reads the readme for the specified repository.
 	 	for each line it reads, it regexes out all non-word characters, leaving only a-zA-Z0-9 while replacing all instances
 	 	of unwanted characters with spaces. next, it splits the string by space, and adds all the resulting words to the suffix tree.
