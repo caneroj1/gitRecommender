@@ -40,14 +40,41 @@ public class WebRequest extends HttpServlet{
 		return footer.toString();
 	}
 	
+	public String returnFormFieldWithLabel(String formIdentifier, String formDisplayName, String placeholder) {
+		String html = "<div class='form-group'>";
+		
+		html += ("<label for='" + formIdentifier + "' class='col-sm-2 control-label'>" + formDisplayName + "</label>");
+		html += "<div class='col-sm-10'>";
+		html += ("<input type='text' class='form-control' id='" + formIdentifier + "' name='" + formIdentifier + "' placeholder='" + placeholder + "'>");
+		html += "</div>";
+		html += "</div>";
+		return html;
+	}
+	
+	// this handles a form submission from the main page and strings all of the request parameters into a query string.
+	public String processFormSubmit(HttpServletRequest request) {
+		String queryString = "";
+		queryString += ("?githubName=" + request.getParameter("githubName"));
+		queryString += ("&repositoryName=" + request.getParameter("repositoryName"));
+		queryString += ("&keyword1=" + request.getParameter("keyword1"));
+		queryString += ("&keyword2=" + request.getParameter("keyword2"));
+		queryString += ("&keyword3=" + request.getParameter("keyword3"));
+		queryString += ("&keyword4=" + request.getParameter("keyword4"));
+		queryString += ("&keyword5=" + request.getParameter("keyword5"));
+		return queryString;
+	}
+	
 	public HashMap<String, String> getQueryVariables(String queryString) {
 		HashMap<String, String> urlData = new HashMap<String, String>();
-		String[] urlVariables = queryString.split("&");
-		String[] varSplit = new String[2];
-		
-		for(String variable : urlVariables) {
-			varSplit = variable.split("=");
-			urlData.put(varSplit[0], varSplit[1]);
+
+		if(queryString != null) {
+			String[] urlVariables = queryString.split("&");
+			String[] varSplit = new String[2];
+			
+			for(String variable : urlVariables) {
+				varSplit = variable.split("=");
+				urlData.put(varSplit[0], varSplit[1]);
+			}
 		}
 		
 		return urlData;
