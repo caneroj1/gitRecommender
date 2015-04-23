@@ -2,10 +2,10 @@ package gitrecommender;
 
 import java.net.*;
 import java.io.*;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-
 
 import org.kohsuke.github.*;
 
@@ -14,8 +14,8 @@ public class Recommender {
 	/* this is just the function where we compute the total distance that a repository is from the user.
 	 	right now it doesn't do much, but maybe we can tweak some weights or something in here.
 	 */
-	public static int overallDistance(int readmeDistance, int languageDistance) {
-		return readmeDistance + languageDistance;
+	public static int overallDistance(int readmeDistance, int languageDistance, int timeDifference, int watchersRank) {
+		return readmeDistance + languageDistance + timeDifference + watchersRank;
 	}
 	
 	/* reads the readme for the specified repository.
@@ -140,6 +140,39 @@ public class Recommender {
 		
 		runningSum *= 50;
 		return runningSum.intValue();
+	}
+	
+	
+	// rank the repository's most recent activity in terms of desirability
+	public static int activity(GHRepository repository) {
+		long daysSinceLastPush = timeDifference(repository.getPushedAt());
+		double normalized = normalize(daysSinceLastPush);
+		int activityRank = (int) (100 * normalized);
+		
+		return activityRank;
+	}
+	
+	// compute the time difference in days between the last push to the repository and the current time.
+	private static long timeDifference(Date pushTime) {
+		Date currentTime = new Date();
+		long difference = currentTime.getTime();
+		long secondsToDaysFactor = 86400000;
+		difference -= pushTime.getTime();
+		
+		return difference / secondsToDaysFactor;
+	}
+	
+	// function normalize some value between 0 and 1
+	private static double normalize(long value) {
+		if(value < 1) return 0;
+		return(1 - Math.exp(-Math.log10(value)));
+	}
+	
+	// function to map a number of watchers for a repo to a value between 0 and 100
+	public static int mapWatchers(GHRepository repository) {
+		int watchers = repository.getWatchers();
+		if(watchers <= 1) return 100;
+		return(int)( 100 / Math.log(watchers));
 	}
 	
 	// merges two hash maps. it adds values from the two hashes if both hashes have the corresponding key, otherwise we just

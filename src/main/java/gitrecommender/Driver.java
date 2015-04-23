@@ -60,7 +60,7 @@ public class Driver extends WebRequest {
 	// this does all of the heavy lifting after a successful post request. it accepts a query string and parses variables
 	// from the query string and does all of the recommendation stuff.
 	private String processRecommendation(String queryString) throws IOException {
-		GitHub gh = GitHub.connectUsingOAuth("put oauth token here");
+		GitHub gh = GitHub.connectUsingOAuth("dbecfb2322c76d3fb4f59e0154a02335c51ba020");
 		
 		HashMap<String, String> queryVars = getQueryVariables(queryString);
 		String html = "";
@@ -75,12 +75,16 @@ public class Driver extends WebRequest {
 			
 			int languageSimilarity = Recommender.computeLanguageDistance(myRank, Recommender.computeLanguageRank(repository));
 			int keywordSimilarity = Recommender.analyzeReadme(repository, treeKeywords);
-			int distance = Recommender.overallDistance(keywordSimilarity, languageSimilarity);
+			int timeDifference = Recommender.activity(repository);
+			int watchersRank = Recommender.mapWatchers(repository);
+			int distance = Recommender.overallDistance(keywordSimilarity, languageSimilarity, timeDifference, watchersRank);
 		
 			html += ("<h4 class='text-center'>Language distance between \"" + repositoryName + "\" = " + languageSimilarity + "</h4>");
 			html +=("<h4 class='text-center'>Keyword distance between \"" + repositoryName + "\" = " + keywordSimilarity + "</h4>");
-			html +="<hr/>";
+			html +=("<h4 class='text-center'>Activity rank for \"" + repositoryName + "\" = " + timeDifference + "</h4>");
+			html +=("<h4 class='text-center'>Watcher rank for \"" + repositoryName + "\" = " + watchersRank + "</h4>");
 			html += ("<h3 class='text-center'>Overall distance between \"" + repositoryName + "\" = " + distance + "</h3>");
+			html +="<hr/>";
 		}
 		return html;
 	}
