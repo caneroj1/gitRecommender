@@ -9,5 +9,10 @@
   		<artifactId>github-api</artifactId>
   		<version>1.66</version>
   	</dependency>
+  	<dependency>
+      <groupId>org.javalite</groupId>
+      <artifactId>activejdbc</artifactId>
+      <version>LATEST_VERSION</version>
+    </dependency>
   </dependencies>
 </project>
