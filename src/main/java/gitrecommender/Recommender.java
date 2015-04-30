@@ -11,6 +11,18 @@ import org.kohsuke.github.*;
 
 public class Recommender {
 	
+	/* Calls all of the recommender functionality for a specified GitHub user and a GitHub repo
+	 * You need to pass in the keywords, and the language rank for the GitHub user
+	 */
+	public static int distanceBetween(Repository repository, HashMap<String, Double> userLanguageRank, String[] keywords) throws IOException {
+		int languageDistance = computeLanguageDistance(userLanguageRank, computeLanguageRank(repository));
+		int readmeDistance = analyzeReadme(repository, keywords);
+		int activityDistance = activity(repository);
+		int watchersDistance = mapWatchers(repository);
+		
+		return overallDistance(readmeDistance, languageDistance, activityDistance, watchersDistance);
+	}
+	
 	/* this is just the function where we compute the total distance that a repository is from the user.
 	 	right now it doesn't do much, but maybe we can tweak some weights or something in here.
 	 */
@@ -30,10 +42,9 @@ public class Recommender {
 	 	5th - 4
 	 	the total of these scores - 100 is the rank of the repository in terms of keyword matches
 	 */
-	public static int analyzeReadme(GHRepository repository, String[] keywords) throws IOException {
-		GHContent readme = repository.getReadme();
+	public static int analyzeReadme(Repository repository, String[] keywords) throws IOException {
+		String readmeURL = repository.getReadmeUrl();
 		SuffixTree suffixTree = new SuffixTree();
-		String readmeURL = readme.getDownloadUrl();
 		URL readmeUrl = new URL(readmeURL);
 		URLConnection readmeConnection = readmeUrl.openConnection();
 		BufferedReader readmeReader = new BufferedReader(new InputStreamReader(readmeConnection.getInputStream()));
@@ -63,6 +74,27 @@ public class Recommender {
 		javascript makes up 5, and html makes up 5, the language rank of the repo is:
 		{ ruby = 0.5, javascript= 0.25, html = 0.25 }	
 	*/
+	public static HashMap<String, Double> computeLanguageRank(Repository repository) throws IOException {
+		HashMap<String, String> languages = repository.getLanguages();
+		HashMap<String, Double> languageRank = new HashMap<String, Double>();
+		Iterator<String> iter = languages.values().iterator();
+		
+		// total up the number of bytes written for the given repo
+		long totalBytes = 0;
+		while(iter.hasNext()) {
+			Long num = Long.parseLong(iter.next());
+			totalBytes += num.longValue();
+		}
+		
+		// for each language, determine the percentage
+		for(String language : languages.keySet().toArray(new String[0])) {
+			Long temp = Long.parseLong(languages.get(language));
+			languageRank.put(language, (temp.doubleValue() / totalBytes));
+		}
+	
+		return languageRank;
+	}
+	
 	public static HashMap<String, Double> computeLanguageRank(GHRepository repository) throws IOException {
 		Map<String, Long> languages = repository.listLanguages();
 		HashMap<String, Double> languageRank = new HashMap<String, Double>();
@@ -144,7 +176,7 @@ public class Recommender {
 	
 	
 	// rank the repository's most recent activity in terms of desirability
-	public static int activity(GHRepository repository) {
+	public static int activity(Repository repository) {
 		long daysSinceLastPush = timeDifference(repository.getPushedAt());
 		double normalized = normalize(daysSinceLastPush);
 		int activityRank = (int) (100 * normalized);
@@ -169,7 +201,7 @@ public class Recommender {
 	}
 	
 	// function to map a number of watchers for a repo to a value between 0 and 100
-	public static int mapWatchers(GHRepository repository) {
+	public static int mapWatchers(Repository repository) {
 		int watchers = repository.getWatchers();
 		if(watchers <= 1) return 100;
 		return(int)( 100 / Math.log(watchers));
