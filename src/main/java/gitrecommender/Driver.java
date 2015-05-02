@@ -19,6 +19,7 @@ import org.kohsuke.github.*;
 public class Driver extends WebRequest {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		GitHub gh = GitHub.connectUsingOAuth("dbecfb2322c76d3fb4f59e0154a02335c51ba020");
+		
 		try {
 			Class.forName("org.postgresql.Driver");
 //			Base.open("org.postgresql.Driver", "jdbc:postgresql://45.56.104.253/gitrecommender", "root", "T5jvjabU");
@@ -30,17 +31,17 @@ public class Driver extends WebRequest {
 					+ "Include in your library path!");
 			e.printStackTrace();
 		}
+		
 		PrintWriter page = response.getWriter();
 		page.print(returnHeader());
 		page.print("<div class='container'>");
 		page.print("<div class='row-fluid'>");
 		page.print("<div class='col-md-12'>");
 		page.print("<h1 class='text-center'>Git Recommender</h1>");
-		page.print("<h2 class='text-center'>Repository count =" + Repository.count() + "</h2>");
 		page.print(processRecommendation(request.getQueryString()));
 		
 		page.print("<div class='col-md-10 col-md-offset-1'>");
-		page.print("<form method='post' action='/gitrecommender-1.8/' name='keyword-form' id='keyword-form' class='text-center form-horizontal'>");
+		page.print("<form method='post' action='/gitrecommender-1.93/' name='keyword-form' id='keyword-form' class='text-center form-horizontal'>");
 		page.print(returnFormFieldWithLabel("githubName", "GitHub Username", "Please enter your username"));
 		page.print("<br/>");
 		page.print(returnFormFieldWithLabel("keyword1", "Top Keyword", "This is your most desirable keyword"));
@@ -64,7 +65,7 @@ public class Driver extends WebRequest {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		System.out.println("PROCESSING POST REQUEST");
 		
-		String redirectUrl = "/gitrecommender-1.8/" + processFormSubmit(request);
+		String redirectUrl = "/gitrecommender-1.93/" + processFormSubmit(request);
 		
 		response.setStatus(HttpServletResponse.SC_SEE_OTHER);
 		response.setHeader("Location", redirectUrl);
@@ -89,7 +90,7 @@ public class Driver extends WebRequest {
 			for(Repository repository : Recommender.getRandomRepositories(50).toArray(new Repository[0])) {
 				String repoName = repository.getName();
 				distance = Recommender.distanceBetween(repository, myRank, treeKeywords);
-				System.out.print("Distance between me and repository " + repoName + " = " + distance);
+
 				if(processedRepositories.containsKey(distance)) {
 					processedRepositories.get(distance).add(repoName);
 				}
@@ -98,19 +99,20 @@ public class Driver extends WebRequest {
 					tmpList.add(repoName);
 					processedRepositories.put(distance, tmpList);
 				}
-				System.out.println("right after it");
-				System.out.println(processedRepositories.get(distance));
 			}
 			
-			// get the the first nearest neighbor
+			html += "<div class='col-md-10 col-md-offset-1'>";
+			html += "<h3 class='text-center'>Recommendations for " + queryVars.get("githubName") + "</h3>";
 			int nearestNeighbors = 0;
 			while(nearestNeighbors < 5) {
 				int key = processedRepositories.firstKey();
 				for(String repoName : processedRepositories.remove(key)) {
-					html += (createLink(repoName, "https://github.com/" + repoName));
+					html += ("<p class='text-center'>" + (nearestNeighbors + 1) + ": " + createLink(repoName, "https://github.com/" + repoName) + "</p>");
 					nearestNeighbors += 1;
 				}
 			}
+			
+			html += "</div>";
 		}
 		
 		return html;
