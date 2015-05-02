@@ -40,6 +40,10 @@ public class WebRequest extends HttpServlet{
 		return footer.toString();
 	}
 	
+	public String createLink(String linkName, String linkUrl) {
+		return("<a href='" + linkUrl + "'>" + linkName + "</a>");
+	}
+	
 	public String returnFormFieldWithLabel(String formIdentifier, String formDisplayName, String placeholder) {
 		String html = "<div class='form-group'>";
 		
@@ -55,7 +59,6 @@ public class WebRequest extends HttpServlet{
 	public String processFormSubmit(HttpServletRequest request) {
 		String queryString = "";
 		queryString += ("?githubName=" + request.getParameter("githubName"));
-		queryString += ("&repositoryName=" + request.getParameter("repositoryName"));
 		queryString += ("&keyword1=" + request.getParameter("keyword1"));
 		queryString += ("&keyword2=" + request.getParameter("keyword2"));
 		queryString += ("&keyword3=" + request.getParameter("keyword3"));

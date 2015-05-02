@@ -5,6 +5,7 @@ import java.io.*;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.kohsuke.github.*;
@@ -44,6 +45,10 @@ public class Recommender {
 	 */
 	public static int analyzeReadme(Repository repository, String[] keywords) throws IOException {
 		String readmeURL = repository.getReadmeUrl();
+		if(readmeURL == null || readmeURL.equals("")) {
+			return 100;
+		}
+		
 		SuffixTree suffixTree = new SuffixTree();
 		URL readmeUrl = new URL(readmeURL);
 		URLConnection readmeConnection = readmeUrl.openConnection();
@@ -77,6 +82,10 @@ public class Recommender {
 	public static HashMap<String, Double> computeLanguageRank(Repository repository) throws IOException {
 		HashMap<String, String> languages = repository.getLanguages();
 		HashMap<String, Double> languageRank = new HashMap<String, Double>();
+		if(languageRank.isEmpty()) {
+			return new HashMap<String, Double>();
+		}
+		
 		Iterator<String> iter = languages.values().iterator();
 		
 		// total up the number of bytes written for the given repo
@@ -98,6 +107,9 @@ public class Recommender {
 	public static HashMap<String, Double> computeLanguageRank(GHRepository repository) throws IOException {
 		Map<String, Long> languages = repository.listLanguages();
 		HashMap<String, Double> languageRank = new HashMap<String, Double>();
+		if(languageRank.isEmpty()) {
+			return new HashMap<String, Double>();
+		}
 		Iterator<Long> iter = languages.values().iterator();
 		
 		// total up the number of bytes written for the given repo
@@ -165,9 +177,11 @@ public class Recommender {
 			}
 		}
 		
-		for(String language : targetRank.keySet().toArray(new String[0])) {
-			Number targetNumber = targetRank.remove(language);
-			runningSum += targetNumber.doubleValue();
+		if(!targetRank.isEmpty()) {
+			for(String language : targetRank.keySet().toArray(new String[0])) {
+				Number targetNumber = targetRank.remove(language);
+				runningSum += targetNumber.doubleValue();
+			}
 		}
 		
 		runningSum *= 50;
@@ -202,7 +216,7 @@ public class Recommender {
 	
 	// function to map a number of watchers for a repo to a value between 0 and 100
 	public static int mapWatchers(Repository repository) {
-		int watchers = repository.getWatchers();
+		int watchers = (Integer)repository.getWatchers();
 		if(watchers <= 1) return 100;
 		return(int)( 100 / Math.log(watchers));
 	}
@@ -233,5 +247,12 @@ public class Recommender {
 		}
 		
 		return newMap;
+	}
+	
+	// returns a number of random repositories from the db
+	public static List<Repository> getRandomRepositories(int limit) {
+		Long count = Repository.count();
+		List<Repository> randomRepos = Repository.findBySQL("SELECT * FROM repositories OFFSET random() * " + count.intValue() + " LIMIT " + limit + ";");
+		return randomRepos;
 	}
 }

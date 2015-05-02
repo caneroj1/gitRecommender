@@ -2,21 +2,23 @@ package gitrecommender;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.TreeMap;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.javalite.activejdbc.Base;
+import org.javalite.activejdbc.*;
 import org.kohsuke.github.*;
 
 @SuppressWarnings("serial")
 @WebServlet("/")
 public class Driver extends WebRequest {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		
+		GitHub gh = GitHub.connectUsingOAuth("dbecfb2322c76d3fb4f59e0154a02335c51ba020");
 		try {
 			Class.forName("org.postgresql.Driver");
 //			Base.open("org.postgresql.Driver", "jdbc:postgresql://45.56.104.253/gitrecommender", "root", "T5jvjabU");
@@ -29,19 +31,17 @@ public class Driver extends WebRequest {
 			e.printStackTrace();
 		}
 		PrintWriter page = response.getWriter();
-
 		page.print(returnHeader());
 		page.print("<div class='container'>");
 		page.print("<div class='row-fluid'>");
 		page.print("<div class='col-md-12'>");
 		page.print("<h1 class='text-center'>Git Recommender</h1>");
-		
+		page.print("<h2 class='text-center'>Repository count =" + Repository.count() + "</h2>");
 		page.print(processRecommendation(request.getQueryString()));
 		
 		page.print("<div class='col-md-10 col-md-offset-1'>");
-		page.print("<form method='post' action='/gitrecommender/' name='keyword-form' id='keyword-form' class='text-center form-horizontal'>");
+		page.print("<form method='post' action='/gitrecommender-1.8/' name='keyword-form' id='keyword-form' class='text-center form-horizontal'>");
 		page.print(returnFormFieldWithLabel("githubName", "GitHub Username", "Please enter your username"));
-//		page.print(returnFormFieldWithLabel("repositoryName", "Repository Name", "What repository should we compare?"));
 		page.print("<br/>");
 		page.print(returnFormFieldWithLabel("keyword1", "Top Keyword", "This is your most desirable keyword"));
 		page.print(returnFormFieldWithLabel("keyword2", "Next Keyword", ""));
@@ -64,7 +64,7 @@ public class Driver extends WebRequest {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		System.out.println("PROCESSING POST REQUEST");
 		
-		String redirectUrl = "/gitrecommender/" + processFormSubmit(request);
+		String redirectUrl = "/gitrecommender-1.8/" + processFormSubmit(request);
 		
 		response.setStatus(HttpServletResponse.SC_SEE_OTHER);
 		response.setHeader("Location", redirectUrl);
@@ -80,31 +80,39 @@ public class Driver extends WebRequest {
 		
 		if(!queryVars.isEmpty()) {
 			String[] treeKeywords = { queryVars.get("keyword1"), queryVars.get("keyword2"), queryVars.get("keyword3"), queryVars.get("keyword4"), queryVars.get("keyword5") };
-//			String repositoryName = queryVars.get("repositoryName");
 			GHUser me = gh.getUser(queryVars.get("githubName"));
 			
 			HashMap<String, Double> myRank = Recommender.computeUserAverageLanguageRank(me, me.getPublicRepoCount());
+			TreeMap<Integer, ArrayList<String>> processedRepositories = new TreeMap<Integer, ArrayList<String>>();
 			
-			for(Repository repository : Repository.findAll().toArray(new Repository[0])) {
-				System.out.print("Distance between me and repository " + repository.getName() + " = ");
-				System.out.println(Recommender.distanceBetween(repository, myRank, treeKeywords));
+			int distance;
+			for(Repository repository : Recommender.getRandomRepositories(50).toArray(new Repository[0])) {
+				String repoName = repository.getName();
+				distance = Recommender.distanceBetween(repository, myRank, treeKeywords);
+				System.out.print("Distance between me and repository " + repoName + " = " + distance);
+				if(processedRepositories.containsKey(distance)) {
+					processedRepositories.get(distance).add(repoName);
+				}
+				else {
+					ArrayList<String> tmpList = new ArrayList<String>();
+					tmpList.add(repoName);
+					processedRepositories.put(distance, tmpList);
+				}
+				System.out.println("right after it");
+				System.out.println(processedRepositories.get(distance));
 			}
 			
-//			GHRepository repository = gh.getRepository(repositoryName);
-			
-//			int languageSimilarity = Recommender.computeLanguageDistance(myRank, Recommender.computeLanguageRank(repository));
-//			int keywordSimilarity = Recommender.analyzeReadme(repository, treeKeywords);
-//			int timeDifference = Recommender.activity(repository);
-//			int watchersRank = Recommender.mapWatchers(repository);
-//			int distance = Recommender.overallDistance(keywordSimilarity, languageSimilarity, timeDifference, watchersRank);
-		
-//			html += ("<h4 class='text-center'>Language distance between \"" + repositoryName + "\" = " + languageSimilarity + "</h4>");
-//			html +=("<h4 class='text-center'>Keyword distance between \"" + repositoryName + "\" = " + keywordSimilarity + "</h4>");
-//			html +=("<h4 class='text-center'>Activity rank for \"" + repositoryName + "\" = " + timeDifference + "</h4>");
-//			html +=("<h4 class='text-center'>Watcher rank for \"" + repositoryName + "\" = " + watchersRank + "</h4>");
-//			html += ("<h3 class='text-center'>Overall distance between \"" + repositoryName + "\" = " + distance + "</h3>");
-//			html +="<hr/>";
+			// get the the first nearest neighbor
+			int nearestNeighbors = 0;
+			while(nearestNeighbors < 5) {
+				int key = processedRepositories.firstKey();
+				for(String repoName : processedRepositories.remove(key)) {
+					html += (createLink(repoName, "https://github.com/" + repoName));
+					nearestNeighbors += 1;
+				}
+			}
 		}
+		
 		return html;
 	}
 }

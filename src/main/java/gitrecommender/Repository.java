@@ -10,16 +10,20 @@ public class Repository extends Model {
 		return ((HashMap<String, String>) this.get("languages"));
 	}
 	
+	public String getId() {
+		return (String) this.get("id");
+	}
+	
 	public String getReadmeUrl() {
 		return (String) this.get("readme_url");
 	}
 	
-	public int getWatchers() {
-		return (int) this.get("watchers");
+	public Object getWatchers() {
+		return this.get("watchers");
 	}
 	
 	public Date getPushedAt() {
-		return (Date) this.get("pushed_At");
+		return (Date) this.get("pushed_at");
 	}
 	
 	public String getName() {
