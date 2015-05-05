@@ -2,7 +2,7 @@ require 'active_record'
 require 'pg'
 require 'octokit'
 
-require_relative 'config'
+require_relative '../config'
 
 new_repo_count = 0
 rescued_error_count = 0
@@ -17,7 +17,6 @@ loop do
 
   loop do
     begin
-      puts repository_response.rels.inspect
       repository_response.data.each do |repo|
         repository_response.data.delete(repo)
         new_repo_count += insert_new_repo(@client, repo)
