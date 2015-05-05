@@ -1,4 +1,5 @@
 require "dotenv"
+require 'active_record'
 Dotenv.load
 
 ActiveRecord::Base.establish_connection(
@@ -16,6 +17,16 @@ end
                               access_token: ENV["token"])
 NEW_REPO_COUNT = 1000
 
+def compile_training_data(response)
+  puts "Processing #{response[:full_name]}"
+  data = {}
+  data[:watchers] = response[:watchers]
+  data[:commit]   = get_last_commit_time(response[:full_name]).strftime('%s')
+  data[:language] = get_languages(@client.languages(response[:full_name])).to_a.max { |a, b| a[1] <=> b[1] }
+  data[:language] = data[:language][0] unless data[:language].nil?
+  data
+end
+
 def get_number_of_watchers(api_response)
   return 0 if api_response.data.count.eql?(0)
   return api_response.data.count if api_response.rels.empty?
@@ -24,7 +35,7 @@ def get_number_of_watchers(api_response)
   (count_on_last_page + (number_of_pages - 1) * 30)
 end
 
-def get_last_commit_time(repo_name, main_branch)
+def get_last_commit_time(repo_name, main_branch = nil)
   main_branch ||= "master"
   @client.branch(repo_name, main_branch)[:commit][:commit][:author][:date]
 end

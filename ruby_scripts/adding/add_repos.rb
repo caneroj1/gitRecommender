@@ -12,7 +12,7 @@ require 'active_record'
 require 'pg'
 require 'octokit'
 
-require_relative 'config'
+require_relative '../config'
 
 new_repo_count = 0
 rescued_error_count = 0

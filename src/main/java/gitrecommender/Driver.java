@@ -18,20 +18,6 @@ import org.kohsuke.github.*;
 @WebServlet("/")
 public class Driver extends WebRequest {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		GitHub gh = GitHub.connectUsingOAuth("dbecfb2322c76d3fb4f59e0154a02335c51ba020");
-		
-		try {
-			Class.forName("org.postgresql.Driver");
-//			Base.open("org.postgresql.Driver", "jdbc:postgresql://45.56.104.253/gitrecommender", "root", "T5jvjabU");
-			Base.open("org.postgresql.Driver", "jdbc:postgresql://localhost/gitrecommender", "joecanero", "");
-			
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			System.out.println("Where is your PostgreSQL JDBC Driver? "
-					+ "Include in your library path!");
-			e.printStackTrace();
-		}
-		
 		PrintWriter page = response.getWriter();
 		page.print(returnHeader());
 		page.print("<div class='container'>");
@@ -41,7 +27,7 @@ public class Driver extends WebRequest {
 		page.print(processRecommendation(request.getQueryString()));
 		
 		page.print("<div class='col-md-10 col-md-offset-1'>");
-		page.print("<form method='post' action='/gitrecommender-1.93/' name='keyword-form' id='keyword-form' class='text-center form-horizontal'>");
+		page.print("<form method='post' action='/gitrecommender-2/' name='keyword-form' id='keyword-form' class='text-center form-horizontal'>");
 		page.print(returnFormFieldWithLabel("githubName", "GitHub Username", "Please enter your username"));
 		page.print("<br/>");
 		page.print(returnFormFieldWithLabel("keyword1", "Top Keyword", "This is your most desirable keyword"));
@@ -65,7 +51,7 @@ public class Driver extends WebRequest {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		System.out.println("PROCESSING POST REQUEST");
 		
-		String redirectUrl = "/gitrecommender-1.93/" + processFormSubmit(request);
+		String redirectUrl = "/gitrecommender-2/" + processFormSubmit(request);
 		
 		response.setStatus(HttpServletResponse.SC_SEE_OTHER);
 		response.setHeader("Location", redirectUrl);
@@ -76,6 +62,18 @@ public class Driver extends WebRequest {
 	private String processRecommendation(String queryString) throws IOException {
 		GitHub gh = GitHub.connectUsingOAuth("dbecfb2322c76d3fb4f59e0154a02335c51ba020");
 		
+		try {
+			Class.forName("org.postgresql.Driver");
+			Base.open("org.postgresql.Driver", "jdbc:postgresql://localhost:5432/gitrecommender", "root", "rootpassword");
+//			Base.open("org.postgresql.Driver", "jdbc:postgresql://localhost:5432/gitrecommender", "joecanero", "");
+			
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			System.out.println("Where is your PostgreSQL JDBC Driver? "
+					+ "Include in your library path!");
+			e.printStackTrace();
+		}
+		
 		HashMap<String, String> queryVars = getQueryVariables(queryString);
 		String html = "";
 		
@@ -84,19 +82,18 @@ public class Driver extends WebRequest {
 			GHUser me = gh.getUser(queryVars.get("githubName"));
 			
 			HashMap<String, Double> myRank = Recommender.computeUserAverageLanguageRank(me, me.getPublicRepoCount());
-			TreeMap<Integer, ArrayList<String>> processedRepositories = new TreeMap<Integer, ArrayList<String>>();
+			TreeMap<Integer, ArrayList<Repository>> processedRepositories = new TreeMap<Integer, ArrayList<Repository>>();
 			
 			int distance;
 			for(Repository repository : Recommender.getRandomRepositories(50).toArray(new Repository[0])) {
-				String repoName = repository.getName();
 				distance = Recommender.distanceBetween(repository, myRank, treeKeywords);
 
 				if(processedRepositories.containsKey(distance)) {
-					processedRepositories.get(distance).add(repoName);
+					processedRepositories.get(distance).add(repository);
 				}
 				else {
-					ArrayList<String> tmpList = new ArrayList<String>();
-					tmpList.add(repoName);
+					ArrayList<Repository> tmpList = new ArrayList<Repository>();
+					tmpList.add(repository);
 					processedRepositories.put(distance, tmpList);
 				}
 			}
@@ -106,8 +103,8 @@ public class Driver extends WebRequest {
 			int nearestNeighbors = 0;
 			while(nearestNeighbors < 5) {
 				int key = processedRepositories.firstKey();
-				for(String repoName : processedRepositories.remove(key)) {
-					html += ("<p class='text-center'>" + (nearestNeighbors + 1) + ": " + createLink(repoName, "https://github.com/" + repoName) + "</p>");
+				for(Repository repo : processedRepositories.remove(key)) {
+					html += ("<p class='text-center'>" + (nearestNeighbors + 1) + ": " + createLink(repo.getName(), "https://github.com/" + repo.getName()) + "</p>");
 					nearestNeighbors += 1;
 				}
 			}
