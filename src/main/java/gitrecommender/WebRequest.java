@@ -67,6 +67,11 @@ public class WebRequest extends HttpServlet{
 		return queryString;
 	}
 	
+	public boolean blankKeywords(String[] keywords) {
+		for(int i = 0; i < keywords.length; i++) { if(keywords[i].equals("")) return true; }
+		return false;
+	}
+	
 	public HashMap<String, String> getQueryVariables(String queryString) {
 		HashMap<String, String> urlData = new HashMap<String, String>();
 
@@ -76,7 +81,8 @@ public class WebRequest extends HttpServlet{
 			
 			for(String variable : urlVariables) {
 				varSplit = variable.split("=");
-				urlData.put(varSplit[0], varSplit[1]);
+				if(varSplit.length == 1) { urlData.put(varSplit[0], ""); }
+				else { urlData.put(varSplit[0], varSplit[1]); }
 			}
 		}
 		
