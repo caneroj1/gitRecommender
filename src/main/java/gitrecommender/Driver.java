@@ -27,7 +27,7 @@ public class Driver extends WebRequest {
 		page.print(processRecommendation(request.getQueryString()));
 		
 		page.print("<div class='col-md-10 col-md-offset-1'>");
-		page.print("<form method='post' action='/gitrecommender-2.23/' name='keyword-form' id='keyword-form' class='text-center form-horizontal'>");
+		page.print("<form method='post' action='/gitrecommender-2.52/' name='keyword-form' id='keyword-form' class='text-center form-horizontal'>");
 		page.print(returnFormFieldWithLabel("githubName", "GitHub Username", "Please enter your username"));
 		page.print("<br/>");
 		page.print(returnFormFieldWithLabel("keyword1", "Top Keyword", "This is your most desirable keyword"));
@@ -49,7 +49,7 @@ public class Driver extends WebRequest {
 	// this post request handles the form submission from the page. it basically takes all of the form parameters
 	// and throws them into a query string to be passed to the get request for this page.
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		String redirectUrl = "/gitrecommender-2.23/" + processFormSubmit(request);
+		String redirectUrl = "/gitrecommender-2.52/" + processFormSubmit(request);
 		
 		response.setStatus(HttpServletResponse.SC_SEE_OTHER);
 		response.setHeader("Location", redirectUrl);
@@ -119,8 +119,10 @@ public class Driver extends WebRequest {
 			while(nearestNeighbors < 5) {
 				int key = processedRepositories.firstKey();
 				for(Repository repo : processedRepositories.remove(key)) {
-					html += ("<p class='text-center'>" + (nearestNeighbors + 1) + ": " + createLink(repo.getName(), "https://github.com/" + repo.getName()) + "</p>");
-					nearestNeighbors += 1;
+					if(nearestNeighbors < 5) {
+						html += ("<p class='text-center'>" + (nearestNeighbors + 1) + ": " + createLink(repo.getName(), "https://github.com/" + repo.getName()) + "</p>");
+						nearestNeighbors += 1;
+					}
 				}
 			}
 			

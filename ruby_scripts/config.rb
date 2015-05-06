@@ -6,6 +6,7 @@ ActiveRecord::Base.establish_connection(
   adapter:  'postgresql',
   host:     ENV["host"],
   database: ENV["database_name"],
+
   username: ENV["database_username"]
 )
 
@@ -16,10 +17,12 @@ end
                               password: ENV["password"],
                               access_token: ENV["token"])
 NEW_REPO_COUNT = 1000
+NEW_REPO_TRAINING_DATA_COUNT = 20
 
-def compile_training_data(response)
+def compile_training_data(response, liked)
   puts "Processing #{response[:full_name]}"
-  data = {}
+  data = { liked: liked }
+  data[:id]       = response[:id]
   data[:watchers] = response[:watchers]
   data[:commit]   = get_last_commit_time(response[:full_name]).strftime('%s')
   data[:language] = get_languages(@client.languages(response[:full_name])).to_a.max { |a, b| a[1] <=> b[1] }
