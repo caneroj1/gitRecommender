@@ -40,6 +40,10 @@ public class WebRequest extends HttpServlet{
 		return footer.toString();
 	}
 	
+	public String createLink(String linkName, String linkUrl) {
+		return("<a class='text-center' href='" + linkUrl + "'>" + linkName + "</a>");
+	}
+	
 	public String returnFormFieldWithLabel(String formIdentifier, String formDisplayName, String placeholder) {
 		String html = "<div class='form-group'>";
 		
@@ -55,13 +59,17 @@ public class WebRequest extends HttpServlet{
 	public String processFormSubmit(HttpServletRequest request) {
 		String queryString = "";
 		queryString += ("?githubName=" + request.getParameter("githubName"));
-		queryString += ("&repositoryName=" + request.getParameter("repositoryName"));
 		queryString += ("&keyword1=" + request.getParameter("keyword1"));
 		queryString += ("&keyword2=" + request.getParameter("keyword2"));
 		queryString += ("&keyword3=" + request.getParameter("keyword3"));
 		queryString += ("&keyword4=" + request.getParameter("keyword4"));
 		queryString += ("&keyword5=" + request.getParameter("keyword5"));
 		return queryString;
+	}
+	
+	public boolean blankKeywords(String[] keywords) {
+		for(int i = 0; i < keywords.length; i++) { if(keywords[i].equals("")) return true; }
+		return false;
 	}
 	
 	public HashMap<String, String> getQueryVariables(String queryString) {
@@ -73,7 +81,8 @@ public class WebRequest extends HttpServlet{
 			
 			for(String variable : urlVariables) {
 				varSplit = variable.split("=");
-				urlData.put(varSplit[0], varSplit[1]);
+				if(varSplit.length == 1) { urlData.put(varSplit[0], ""); }
+				else { urlData.put(varSplit[0], varSplit[1]); }
 			}
 		}
 		

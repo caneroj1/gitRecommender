@@ -1,5 +1,6 @@
 package gitrecommender;
 
+// An implementation of a suffix tree in order to facilitate fast lookups of words from repository readmes.
 public class SuffixTree {
   SuffixTreeNode rootNode;
 
