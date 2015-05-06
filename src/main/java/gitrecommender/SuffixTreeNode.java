@@ -1,5 +1,7 @@
 package gitrecommender;
 
+// Nodes for the suffix tree.
+// Each node essentially stores more suffix tree nodes in an array that is indexed by the ascii decimal value of a character.
 public class SuffixTreeNode {
 	  private SuffixTreeNode[] treeNodes;
 

@@ -35,5 +35,11 @@ local.properties
 # sbteclipse plugin
 .target
 
+.bash_profile
+ruby_scripts/.env
+
 # TeXlipse plugin
 .texlipse
+/target/
+/target/
+/target/
