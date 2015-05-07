@@ -1,5 +1,6 @@
 package gitrecommender;
 
+import java.text.DecimalFormat;
 import java.util.Date;
 import java.util.HashMap;
 
@@ -71,8 +72,9 @@ public class Repository extends Model {
 		this.keywordsMatched = keywordsMatched;
 	}
 	
-	public int getRecommenderScore() {
-		return recommenderScore;
+	public String getRecommenderScore() {
+		DecimalFormat formatter = new DecimalFormat("0.00");
+		return (formatter.format(recommenderScore/400.0));
 	}
 
 	public void setRecommenderScore(int recommenderScore) {
