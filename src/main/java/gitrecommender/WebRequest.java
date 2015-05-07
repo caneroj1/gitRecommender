@@ -1,6 +1,11 @@
 package gitrecommender;
 
+import org.json.*;
+
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringWriter;
 import java.util.HashMap;
 
@@ -11,19 +16,61 @@ import javax.servlet.http.HttpServletResponse;
 
 @SuppressWarnings("serial")
 public class WebRequest extends HttpServlet{
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {	
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		// implement in inherited classes
 	}
 	
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		// implement in inherited classes
+	}
+	
+	public JSONObject parseJSONFile(String filepath) throws FileNotFoundException {
+//		InputStream stream = new FileInputStream(filepath);
+		InputStream stream = getClass().getResourceAsStream(filepath);
+		return new JSONObject(new JSONTokener(stream));
+	}
+	
+	public String dataSectionForDonutChart(JSONObject languageColors, HashMap<String, Double> languages) {
+		String data = "var data = [\n";
+		
+		String[] langNames = languages.keySet().toArray(new String[0]);
+		String key, htmlColor;
+		System.out.println("Inside 2");
+		System.out.println(languages.toString());
+		for(int i = 0; i < languages.size(); i++) {
+			data += "\t{\n";
+			key = langNames[i];
+			htmlColor = languageColors.getString(key);
+			data += ("\t\tvalue: " + languages.get(key).doubleValue()); 
+			data += (",\n\t\tcolor: \"" + htmlColor + "\"");
+			data += (",\n\t\thighlight: \"" + htmlColor + "\"");
+			data += (",\n\t\tlabel: \"" + key + "\"");
+			if(i != languages.size() - 1) { data += ("\n\t},\n"); }
+			else { data += ("\n\t}\n"); }
+		}
+		data += "];\n";
+		return data;
+	}
+	
+	public String makeDonutChart(HashMap<String, Double> languages) throws FileNotFoundException {
+		System.out.println("Inside 1");
+		System.out.println(languages.toString());
+		JSONObject languageColors = parseJSONFile("/colors.json");
+		String html = "<script>\nvar ctx = document.getElementById(\"languageChart\").getContext(\"2d\");\n";
+		html += dataSectionForDonutChart(languageColors, languages);
+		html += "var myLanguageChart = new Chart(ctx).Doughnut(data);";
+		
+		html += "</script>";
+		return html;
 	}
 	
 	public String returnHeader() {
 		StringWriter header = new StringWriter();
-		
 		header.write("<!DOCTYPE html>\n");
 		header.write("<html lang=\"en\">\n");
         header.write("<head><title>Git Recommender</title>\n");
         header.write("<meta charset=\"utf-8\">\n");
+        header.write("<script src=\"https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js\"></script>");
         header.write("<link rel=\"stylesheet\" href=\"http://maxcdn.bootstrapcdn.com/bootswatch/3.3.4/paper/bootstrap.min.css\"></head>\n");
         header.write("<body>\n");
         

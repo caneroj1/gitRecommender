@@ -86,9 +86,10 @@ public class Recommender {
 	 * { ruby = 0.5, javascript= 0.25, html = 0.25 }	
 	 */
 	public static HashMap<String, Double> computeLanguageRank(Repository repository) throws IOException {
+		System.out.println("wrong method");
 		HashMap<String, String> languages = repository.getLanguages();
 		HashMap<String, Double> languageRank = new HashMap<String, Double>();
-		if(languageRank.isEmpty()) {
+		if(languages.isEmpty()) {
 			return new HashMap<String, Double>();
 		}
 		
@@ -113,10 +114,13 @@ public class Recommender {
 	/* Basically the same as the method given above, but this computes the language rank of a GitHub repository
 	 * that is retrieved from the api, instead of frm our database.
 	 */
-	public static HashMap<String, Double> computeLanguageRank(GHRepository repository) throws IOException {
+	public static HashMap<String, Double> computeLanguageRankFromApi(GHRepository repository) throws IOException {
+		System.out.println("Right here");
 		Map<String, Long> languages = repository.listLanguages();
 		HashMap<String, Double> languageRank = new HashMap<String, Double>();
-		if(languageRank.isEmpty()) {
+		System.out.println(languages);
+		
+		if(languages.isEmpty()) {
 			return new HashMap<String, Double>();
 		}
 		Iterator<Long> iter = languages.values().iterator();
@@ -150,10 +154,10 @@ public class Recommender {
 	 */
 	public static HashMap<String, Double> computeUserAverageLanguageRank(GHUser user, int publicRepoCount) throws IOException {
 		HashMap<String, Double> averageLanguageRank = new HashMap<String, Double>();
-		
+	
 		Iterator<GHRepository> iter = user.getRepositories().values().iterator();
 		while(iter.hasNext()) {
-			averageLanguageRank = mergeHashMaps(averageLanguageRank, computeLanguageRank(iter.next()));
+			averageLanguageRank = mergeHashMaps(averageLanguageRank, computeLanguageRankFromApi(iter.next()));
 		}
 		
 		for(String language : averageLanguageRank.keySet().toArray(new String[0])) {

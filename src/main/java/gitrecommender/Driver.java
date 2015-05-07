@@ -27,7 +27,7 @@ public class Driver extends WebRequest {
 		page.print(processRecommendation(request.getQueryString()));
 		
 		page.print("<div class='col-md-10 col-md-offset-1'>");
-		page.print("<form method='post' action='/gitrecommender-2.52/' name='keyword-form' id='keyword-form' class='text-center form-horizontal'>");
+		page.print("<form method='post' action='/gitrecommender-2.88/' name='keyword-form' id='keyword-form' class='text-center form-horizontal'>");
 		page.print(returnFormFieldWithLabel("githubName", "GitHub Username", "Please enter your username"));
 		page.print("<br/>");
 		page.print(returnFormFieldWithLabel("keyword1", "Top Keyword", "This is your most desirable keyword"));
@@ -49,7 +49,7 @@ public class Driver extends WebRequest {
 	// this post request handles the form submission from the page. it basically takes all of the form parameters
 	// and throws them into a query string to be passed to the get request for this page.
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		String redirectUrl = "/gitrecommender-2.52/" + processFormSubmit(request);
+		String redirectUrl = "/gitrecommender-2.88/" + processFormSubmit(request);
 		
 		response.setStatus(HttpServletResponse.SC_SEE_OTHER);
 		response.setHeader("Location", redirectUrl);
@@ -85,8 +85,8 @@ public class Driver extends WebRequest {
 			
 			try {
 				Class.forName("org.postgresql.Driver");
-				Base.open("org.postgresql.Driver", "jdbc:postgresql://localhost:5432/gitrecommender", "root", "rootpassword");
-//				Base.open("org.postgresql.Driver", "jdbc:postgresql://localhost:5432/gitrecommender", "joecanero", "");
+//				Base.open("org.postgresql.Driver", "jdbc:postgresql://localhost:5432/gitrecommender", "root", "rootpassword");
+				Base.open("org.postgresql.Driver", "jdbc:postgresql://localhost:5432/gitrecommender", "joecanero", "");
 				
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
@@ -95,8 +95,8 @@ public class Driver extends WebRequest {
 				e.printStackTrace();
 			}
 			
-			
 			HashMap<String, Double> myRank = Recommender.computeUserAverageLanguageRank(me, me.getPublicRepoCount());
+			String donutChart = makeDonutChart(myRank);
 			TreeMap<Integer, ArrayList<Repository>> processedRepositories = new TreeMap<Integer, ArrayList<Repository>>();
 			
 			int distance;
@@ -125,6 +125,9 @@ public class Driver extends WebRequest {
 					}
 				}
 			}
+			
+			html += "<canvas class='col-sm-6 col-sm-offset-3' id=\"languageChart\" width='500px' height='500px'></canvas>";
+			html += donutChart;
 			
 			html += "</div>";
 		}
