@@ -25,7 +25,9 @@ public class Recommender {
 		int activityDistance = activity(repository);
 		int watchersDistance = mapWatchers(repository);
 		
-		return overallDistance(readmeDistance, languageDistance, activityDistance, watchersDistance);
+		int recommenderScore = overallDistance(readmeDistance, languageDistance, activityDistance, watchersDistance);
+		repository.setRecommenderScore(recommenderScore);
+		return recommenderScore;
 	}
 	
 	/* This is just the function where we compute the total distance that a repository is from the user.
@@ -66,16 +68,20 @@ public class Recommender {
 		}
 		readmeReader.close();
 		
+		boolean[] keywordsMatched = new boolean[5];
+		
 		int[] scores = { 36, 28, 20, 12, 4 };
 		int repositoryScore = 0;
 		for(int i = 0; i < 5; i++) {
 			if(suffixTree.findWord(keywords[i])) {
+				keywordsMatched[i] = true;
 				repositoryScore += scores[i];
 			}
 		}
 		
 		int score = 100 - repositoryScore;
 		repository.setKeywordsScore(score);
+		repository.setKeywordsMatched(keywordsMatched);
 		return score;
 	}
 	
