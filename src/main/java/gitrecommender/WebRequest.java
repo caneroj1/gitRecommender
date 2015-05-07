@@ -43,8 +43,10 @@ public class WebRequest extends HttpServlet {
 	}
 
 	public String createLink(String linkName, String linkUrl) {
-		return ("<a class='text-center' href='" + linkUrl + "'>" + linkName + "</a>");
-	}
+		return("<div id=\"masonryContainer\">
+			<div class=\"item\"><a href='" + linkUrl + "'>" + linkName + "</a></div>
+			</div>
+		<!--<a class='text-center' href=' + linkUrl + > + linkName + </a>-->");	}
 
 	public String returnFormFieldWithLabel(String formIdentifier,
 			String formDisplayName, String placeholder) {
