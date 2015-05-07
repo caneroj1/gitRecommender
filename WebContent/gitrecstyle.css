@@ -1,0 +1,9 @@
+/* CSS style sheet for Git Recommender 
+   Made for CSC 380-01 Artificial Intelligence Final */ 
+/* Need to have the items as floating and also managed by the CSS */
+
+.item {
+  width: 220px;
+  margin: 10px;
+  float: left;
+}
