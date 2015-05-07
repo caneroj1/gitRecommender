@@ -29,37 +29,36 @@ import org.javalite.activejdbc.Model;
 public class Repository extends Model {
 	private int keywordsScore = 0;
 	private int recommenderScore = 0;
-
 	private boolean[] keywordsMatched;
 
 	public HashMap<String, String> getLanguages() {
 		return ((HashMap<String, String>) this.get("languages"));
 	}
-	
+
 	public String getId() {
 		return (String) this.get("id");
 	}
-	
+
 	public String getReadmeUrl() {
 		return (String) this.get("readme_url");
 	}
-	
+
 	public Object getWatchers() {
 		return this.get("watchers");
 	}
-	
+
 	public Date getPushedAt() {
 		return (Date) this.get("pushed_at");
 	}
-	
+
 	public String getName() {
 		return (String) this.get("name");
 	}
-	
+
 	public void setKeywordsScore(int score) {
 		keywordsScore = score;
 	}
-	
+
 	public int getKeywordsScore() {
 		return keywordsScore;
 	}

@@ -107,7 +107,7 @@ public class WebRequest extends HttpServlet{
 		html += "</script>";
 		return html;
 	}
-	
+
 	public String returnHeader() {
 		StringWriter header = new StringWriter();
 		header.write("<!DOCTYPE html>\n");
@@ -116,37 +116,80 @@ public class WebRequest extends HttpServlet{
         header.write("<meta charset=\"utf-8\">\n");
         header.write("<script src=\"https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js\"></script>");
         header.write("<link rel=\"stylesheet\" href=\"http://maxcdn.bootstrapcdn.com/bootswatch/3.3.4/paper/bootstrap.min.css\"></head>\n");
+        header.write("<link rel=\"stylesheet\" href=\"gitrecstyle.css\"></head>\n");
         header.write("<body>\n");
-        
-        return header.toString();
+
+		return header.toString();
 	}
-	
+
 	public String returnFooter() {
 		StringWriter footer = new StringWriter();
-		
+
 		footer.write("<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js\"></script>");
 		footer.write("<script src=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js\"></script>");
+		footer.write("<script src=\"masonry.pkgd.min.js\"></script>");
+		footer.write("<script src=\"MasonryContainer.js\"></script>");
 		footer.write("</body></html>");
-		
+
 		return footer.toString();
 	}
-	
-	public String createLink(String linkName, String linkUrl) {
-		return("<a class='text-center' href='" + linkUrl + "'>" + linkName + "</a>");
+
+	public String createLink(String linkName, String linkUrl, int priority) {
+		/*
+		 * <button type="button"
+		 * class="btn btn-success btn-lg btn-block">" + linkName + "</button>
+		 */
+
+		if (priority == 1) {
+			return ("<div class=\"span12\"><div class=\"item\"><a href='"
+					+ linkUrl
+					+ "'><button type=\"button\" class=\"btn btn-success btn-lg btn-block\">"
+					+ linkName + "</button>" + "</a></div></div><!--<a class=text-center href= + linkUrl + > + linkName + </a>-->");
+		} else if (priority == 2) {
+			return ("<div class=\"span10\"><div class=\"item\"><a href='"
+					+ linkUrl
+					+ "'><button type=\"button\" class=\"btn btn-success btn-lg btn-block\">"
+					+ linkName + "</button>" + "</a></div></div><!--<a class=text-center href= + linkUrl + > + linkName + </a>-->");
+		} else if (priority == 3) {
+			return ("<div class=\"span8\"><div class=\"item\"><a href='"
+					+ linkUrl
+					+ "'><button type=\"button\" class=\"btn btn-success btn-lg btn-block\">"
+					+ linkName + "</button>" + "</a></div></div><!--<a class=text-center href= + linkUrl + > + linkName + </a>-->");
+		} else if (priority == 4) {
+			return ("<div class=\"span6\"><div class=\"item\"><a href='"
+					+ linkUrl
+					+ "'><button type=\"button\" class=\"btn btn-success btn-lg btn-block\">"
+					+ linkName + "</button>" + "</a></div></div><!--<a class=text-center href= + linkUrl + > + linkName + </a>-->");
+		} else if (priority == 5) {
+			return ("<div class=\"span4\"><div class=\"item\"><a href='"
+					+ linkUrl
+					+ "'><button type=\"button\" class=\"btn btn-success btn-lg btn-block\">"
+					+ linkName + "</button>" + "</a></div></div><!--<a class=text-center href= + linkUrl + > + linkName + </a>-->");
+		} else {
+			return ("<div class=\"item\"><a href='"
+					+ linkUrl
+					+ "'><button type=\"button\" class=\"btn btn-success btn-lg btn-block\">"
+					+ linkName + "</button>" + "</a></div><!--<a class=text-center href= + linkUrl + > + linkName + </a>-->");
+		}
 	}
-	
-	public String returnFormFieldWithLabel(String formIdentifier, String formDisplayName, String placeholder) {
+
+	public String returnFormFieldWithLabel(String formIdentifier,
+			String formDisplayName, String placeholder) {
 		String html = "<div class='form-group'>";
-		
-		html += ("<label for='" + formIdentifier + "' class='col-sm-2 control-label'>" + formDisplayName + "</label>");
+
+		html += ("<label for='" + formIdentifier
+				+ "' class='col-sm-2 control-label'>" + formDisplayName + "</label>");
 		html += "<div class='col-sm-10'>";
-		html += ("<input type='text' class='form-control' id='" + formIdentifier + "' name='" + formIdentifier + "' placeholder='" + placeholder + "'>");
+		html += ("<input type='text' class='form-control' id='"
+				+ formIdentifier + "' name='" + formIdentifier
+				+ "' placeholder='" + placeholder + "'>");
 		html += "</div>";
 		html += "</div>";
 		return html;
 	}
-	
-	// this handles a form submission from the main page and strings all of the request parameters into a query string.
+
+	// this handles a form submission from the main page and strings all of the
+	// request parameters into a query string.
 	public String processFormSubmit(HttpServletRequest request) {
 		String queryString = "";
 		queryString += ("?githubName=" + request.getParameter("githubName"));
@@ -157,26 +200,32 @@ public class WebRequest extends HttpServlet{
 		queryString += ("&keyword5=" + request.getParameter("keyword5"));
 		return queryString;
 	}
-	
+
 	public boolean blankKeywords(String[] keywords) {
-		for(int i = 0; i < keywords.length; i++) { if(keywords[i].equals("")) return true; }
+		for (int i = 0; i < keywords.length; i++) {
+			if (keywords[i].equals(""))
+				return true;
+		}
 		return false;
 	}
-	
+
 	public HashMap<String, String> getQueryVariables(String queryString) {
 		HashMap<String, String> urlData = new HashMap<String, String>();
 
-		if(queryString != null) {
+		if (queryString != null) {
 			String[] urlVariables = queryString.split("&");
 			String[] varSplit = new String[2];
-			
-			for(String variable : urlVariables) {
+
+			for (String variable : urlVariables) {
 				varSplit = variable.split("=");
-				if(varSplit.length == 1) { urlData.put(varSplit[0], ""); }
-				else { urlData.put(varSplit[0], varSplit[1]); }
+				if (varSplit.length == 1) {
+					urlData.put(varSplit[0], "");
+				} else {
+					urlData.put(varSplit[0], varSplit[1]);
+				}
 			}
 		}
-		
+
 		return urlData;
 	}
 }
