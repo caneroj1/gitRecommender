@@ -135,6 +135,7 @@ public class Driver extends WebRequest {
 			html += "<h3 class='text-center'>Recommendations for "
 					+ queryVars.get("githubName") + "</h3>";
 			int nearestNeighbors = 0;
+			html += "<div id=\"masonryContainer\">";
 			while (nearestNeighbors < 5) {
 				int key = processedRepositories.firstKey();
 				for (Repository repo : processedRepositories.remove(key)) {
@@ -143,12 +144,13 @@ public class Driver extends WebRequest {
 								+ (nearestNeighbors + 1)
 								+ ": "
 								+ createLink(repo.getName(),
-										"https://github.com/" + repo.getName()) + "</p>");
+										"https://github.com/" + repo.getName(),
+										(nearestNeighbors + 1)) + "</p>");
 						nearestNeighbors += 1;
 					}
 				}
 			}
-
+			html += "</div>";
 			html += "</div>";
 		}
 		return html;
