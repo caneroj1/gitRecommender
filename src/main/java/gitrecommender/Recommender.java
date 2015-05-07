@@ -26,24 +26,15 @@ public class Recommender {
 	 * and a GitHub repo You need to pass in the keywords, and the language rank
 	 * for the GitHub user.
 	 */
-	public static int distanceBetween(Repository repository,
-			HashMap<String, Double> userLanguageRank, String[] keywords)
-			throws IOException {
+	public static int distanceBetween(Repository repository, HashMap<String, Double> userLanguageRank, String[] keywords) throws IOException {
 		int languageDistance = computeLanguageDistance(userLanguageRank,
 				computeLanguageRank(repository));
 		int readmeDistance = analyzeReadme(repository, keywords);
 		int activityDistance = activity(repository);
 		int watchersDistance = mapWatchers(repository);
-<<<<<<< HEAD
-		
 		int recommenderScore = overallDistance(readmeDistance, languageDistance, activityDistance, watchersDistance);
 		repository.setRecommenderScore(recommenderScore);
 		return recommenderScore;
-=======
-
-		return overallDistance(readmeDistance, languageDistance,
-				activityDistance, watchersDistance);
->>>>>>> master
 	}
 
 	/*
@@ -89,7 +80,6 @@ public class Recommender {
 			}
 		}
 		readmeReader.close();
-<<<<<<< HEAD
 		
 		boolean[] keywordsMatched = new boolean[5];
 		
@@ -98,13 +88,6 @@ public class Recommender {
 		for(int i = 0; i < 5; i++) {
 			if(suffixTree.findWord(keywords[i])) {
 				keywordsMatched[i] = true;
-=======
-
-		int[] scores = { 36, 28, 20, 12, 4 };
-		int repositoryScore = 0;
-		for (int i = 0; i < 5; i++) {
-			if (suffixTree.findWord(keywords[i])) {
->>>>>>> master
 				repositoryScore += scores[i];
 			}
 		}
@@ -123,19 +106,10 @@ public class Recommender {
 	 * up 5, the language rank of the repo is: { ruby = 0.5, javascript= 0.25,
 	 * html = 0.25 }
 	 */
-<<<<<<< HEAD
 	public static HashMap<String, Double> computeLanguageRank(Repository repository) throws IOException {
-		System.out.println("wrong method");
 		HashMap<String, String> languages = repository.getLanguages();
 		HashMap<String, Double> languageRank = new HashMap<String, Double>();
 		if(languages.isEmpty()) {
-=======
-	public static HashMap<String, Double> computeLanguageRank(
-			Repository repository) throws IOException {
-		HashMap<String, String> languages = repository.getLanguages();
-		HashMap<String, Double> languageRank = new HashMap<String, Double>();
-		if (languageRank.isEmpty()) {
->>>>>>> master
 			return new HashMap<String, Double>();
 		}
 
@@ -162,7 +136,6 @@ public class Recommender {
 	 * language rank of a GitHub repository that is retrieved from the api,
 	 * instead of frm our database.
 	 */
-<<<<<<< HEAD
 	public static HashMap<String, Double> computeLanguageRankFromApi(GHRepository repository) throws IOException {
 		System.out.println("Right here");
 		Map<String, Long> languages = repository.listLanguages();
@@ -170,13 +143,6 @@ public class Recommender {
 		System.out.println(languages);
 		
 		if(languages.isEmpty()) {
-=======
-	public static HashMap<String, Double> computeLanguageRank(
-			GHRepository repository) throws IOException {
-		Map<String, Long> languages = repository.listLanguages();
-		HashMap<String, Double> languageRank = new HashMap<String, Double>();
-		if (languageRank.isEmpty()) {
->>>>>>> master
 			return new HashMap<String, Double>();
 		}
 		Iterator<Long> iter = languages.values().iterator();
@@ -213,19 +179,10 @@ public class Recommender {
 	public static HashMap<String, Double> computeUserAverageLanguageRank(
 			GHUser user, int publicRepoCount) throws IOException {
 		HashMap<String, Double> averageLanguageRank = new HashMap<String, Double>();
-<<<<<<< HEAD
 	
 		Iterator<GHRepository> iter = user.getRepositories().values().iterator();
 		while(iter.hasNext()) {
 			averageLanguageRank = mergeHashMaps(averageLanguageRank, computeLanguageRankFromApi(iter.next()));
-=======
-
-		Iterator<GHRepository> iter = user.getRepositories().values()
-				.iterator();
-		while (iter.hasNext()) {
-			averageLanguageRank = mergeHashMaps(averageLanguageRank,
-					computeLanguageRank(iter.next()));
->>>>>>> master
 		}
 
 		for (String language : averageLanguageRank.keySet().toArray(

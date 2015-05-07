@@ -28,7 +28,7 @@ public class Driver extends WebRequest {
 		page.print(processRecommendation(request.getQueryString()));
 
 		page.print("<div class='col-md-10 col-md-offset-1'>");
-		page.print("<form method='post' action='/gitrecommender-3.6/' name='keyword-form' id='keyword-form' class='text-center form-horizontal'>");
+		page.print("<form method='post' action='/gitrecommender-5/' name='keyword-form' id='keyword-form' class='text-center form-horizontal'>");
 		page.print(returnFormFieldWithLabel("githubName", "GitHub Username", "Please enter your username"));
 		page.print("<br/>");
 		page.print(returnFormFieldWithLabel("keyword1", "Top Keyword", "This is your most desirable keyword"));
@@ -50,7 +50,7 @@ public class Driver extends WebRequest {
 	// this post request handles the form submission from the page. it basically takes all of the form parameters
 	// and throws them into a query string to be passed to the get request for this page.
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		String redirectUrl = "/gitrecommender-3.6/" + processFormSubmit(request);
+		String redirectUrl = "/gitrecommender-5/" + processFormSubmit(request);
 		response.setStatus(HttpServletResponse.SC_SEE_OTHER);
 		response.setHeader("Location", redirectUrl);
 	}
@@ -89,12 +89,12 @@ public class Driver extends WebRequest {
 
 			try {
 				Class.forName("org.postgresql.Driver");
-				Base.open("org.postgresql.Driver",
-						"jdbc:postgresql://localhost:5432/gitrecommender",
-						"root", "rootpassword");
-				// Base.open("org.postgresql.Driver",
-				// "jdbc:postgresql://localhost:5432/gitrecommender",
-				// "joecanero", "");
+//				Base.open("org.postgresql.Driver",
+//						"jdbc:postgresql://localhost:5432/gitrecommender",
+//						"root", "rootpassword");
+				 Base.open("org.postgresql.Driver",
+				 "jdbc:postgresql://localhost:5432/gitrecommender",
+				 "joecanero", "");
 
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
@@ -127,11 +127,13 @@ public class Driver extends WebRequest {
 			int nearestNeighbors = 0;
 			Repository[] recommendations = new Repository[5];
 			html += "<div id=\"masonryContainer\">";
+			
+			String tempHtml = "";
 			while (nearestNeighbors < 5) {
 				int key = processedRepositories.firstKey();
 				for (Repository repo : processedRepositories.remove(key)) {
 					if (nearestNeighbors < 5) {
-						html += ("<p class='text-center'>"
+						tempHtml += ("<p class='text-center'>"
 								+ (nearestNeighbors + 1)
 								+ ": "
 								+ createLink(repo.getName(),
@@ -143,11 +145,22 @@ public class Driver extends WebRequest {
 				}
 			}
 			
+			html += "<div class='col-md-12'>";
+			html += "<div class='col-md-6'>";
+			html += "<h5 class='text-center'>Your Language Breakdown</h5>";
 			html += "\n<canvas class='col-sm-6 col-sm-offset-3' id=\"languageChart\" width='500px' height='500px'></canvas>\n";
+			html += "</div>";
 			html += donutChart;
 			
+			html += "<div class='col-md-6'>";
+			html += "<h5 class='text-center'>Keywords Matched</h5>";
 			html += "\n<canvas class='col-sm-6 col-sm-offset-3' id=\"keywordsChart\" width='500px' height='500px'></canvas>\n";
+			html += "</div>";
 			html += makeBarChart(recommendations, treeKeywords);
+			html += "</div>";
+			
+			html += tempHtml;
+			
 			html += "</div>";
 		}
 		return html;
