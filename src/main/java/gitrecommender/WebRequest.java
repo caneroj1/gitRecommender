@@ -39,6 +39,8 @@ public class WebRequest extends HttpServlet {
 		footer.write("<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js\"></script>");
 		footer.write("<script src=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js\"></script>");
 		footer.write("<script src=\"masonry.pkgd.min.js\"></script>");
+		footer.write("<script src=\"MasonryContainer.js\"></script>");
+
 		footer.write("</body></html>");
 
 		return footer.toString();
