@@ -26,7 +26,8 @@ public class WebRequest extends HttpServlet {
 		header.write("<html lang=\"en\">\n");
 		header.write("<head><title>Git Recommender</title>\n");
 		header.write("<meta charset=\"utf-8\">\n");
-		header.write("<link rel=\"stylesheet\" href=\"http://maxcdn.bootstrapcdn.com/bootswatch/3.3.4/paper/bootstrap.min.css\"></head>\n");
+		header.write("<link rel=\"stylesheet\" href=\"http://maxcdn.bootstrapcdn.com/bootswatch/3.3.4/paper/bootstrap.min.css\">");
+		header.write("<link rel=\"stylesheet\" href=\"gitrecstyle.css\"></head>\n");
 		header.write("<body>\n");
 
 		return header.toString();
@@ -37,16 +38,16 @@ public class WebRequest extends HttpServlet {
 
 		footer.write("<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js\"></script>");
 		footer.write("<script src=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js\"></script>");
+		footer.write("<script src=\"masonry.pkgd.min.js\"></script>");
 		footer.write("</body></html>");
 
 		return footer.toString();
 	}
 
 	public String createLink(String linkName, String linkUrl) {
-		return("<div id=\"masonryContainer\">
-			<div class=\"item\"><a href='" + linkUrl + "'>" + linkName + "</a></div>
-			</div>
-		<!--<a class='text-center' href=' + linkUrl + > + linkName + </a>-->");	}
+		return ("<div id=\"masonryContainer\"><div class=\"item\"><a href='"
+				+ linkUrl + "'>" + linkName + "</a></div></div><!--<a class=text-center href= + linkUrl + > + linkName + </a>-->");
+	}
 
 	public String returnFormFieldWithLabel(String formIdentifier,
 			String formDisplayName, String placeholder) {
