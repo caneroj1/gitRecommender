@@ -77,10 +77,10 @@ public class WebRequest extends HttpServlet{
 		}
 		
 		data += "\t\t\tlabel: \"Keywords\",\n";
-        data += "\t\t\tfillColor: \"rgba(220,220,220,0.5)\",\n";
-        data += "\t\t\tstrokeColor: \"rgba(220,220,220,0.8)\",\n";
-        data += "\t\t\thighlightFill: \"rgba(220,220,220,0.75)\",\n";
-        data += "\t\t\thighlightStroke: \"rgba(220,220,220,1)\",\n";
+        data += "\t\t\tfillColor: \"rgba(151,187,205,0.5)\",\n";
+        data += "\t\t\tstrokeColor: \"rgba(151,187,205,0.5)\",\n";
+        data += "\t\t\thighlightFill: \"rgba(151,187,205,0.5)\",\n";
+        data += "\t\t\thighlightStroke: \"rgba(151,187,205,1)\",\n";
 		data += "\t\t\tdata: [";
 		for(int i = 0; i < 4; i++) {
 			data += (totals[i] + ",");
@@ -134,43 +134,21 @@ public class WebRequest extends HttpServlet{
 		return footer.toString();
 	}
 
+	public String createDropdown(Repository repository) {
+		
+	}
+	
 	public String createLink(String linkName, String linkUrl, int priority) {
-		/*
-		 * <button type="button"
-		 * class="btn btn-success btn-lg btn-block">" + linkName + "</button>
-		 */
-
-		if (priority == 1) {
-			return ("<div class=\"span12\"><div class=\"item\"><a href='"
-					+ linkUrl
-					+ "'><button type=\"button\" class=\"btn btn-success btn-lg btn-block\">"
-					+ linkName + "</button>" + "</a></div></div><!--<a class=text-center href= + linkUrl + > + linkName + </a>-->");
-		} else if (priority == 2) {
-			return ("<div class=\"span10\"><div class=\"item\"><a href='"
-					+ linkUrl
-					+ "'><button type=\"button\" class=\"btn btn-success btn-lg btn-block\">"
-					+ linkName + "</button>" + "</a></div></div><!--<a class=text-center href= + linkUrl + > + linkName + </a>-->");
-		} else if (priority == 3) {
-			return ("<div class=\"span8\"><div class=\"item\"><a href='"
-					+ linkUrl
-					+ "'><button type=\"button\" class=\"btn btn-success btn-lg btn-block\">"
-					+ linkName + "</button>" + "</a></div></div><!--<a class=text-center href= + linkUrl + > + linkName + </a>-->");
-		} else if (priority == 4) {
-			return ("<div class=\"span6\"><div class=\"item\"><a href='"
-					+ linkUrl
-					+ "'><button type=\"button\" class=\"btn btn-success btn-lg btn-block\">"
-					+ linkName + "</button>" + "</a></div></div><!--<a class=text-center href= + linkUrl + > + linkName + </a>-->");
-		} else if (priority == 5) {
-			return ("<div class=\"span4\"><div class=\"item\"><a href='"
-					+ linkUrl
-					+ "'><button type=\"button\" class=\"btn btn-success btn-lg btn-block\">"
-					+ linkName + "</button>" + "</a></div></div><!--<a class=text-center href= + linkUrl + > + linkName + </a>-->");
-		} else {
-			return ("<div class=\"item\"><a href='"
-					+ linkUrl
-					+ "'><button type=\"button\" class=\"btn btn-success btn-lg btn-block\">"
-					+ linkName + "</button>" + "</a></div><!--<a class=text-center href= + linkUrl + > + linkName + </a>-->");
-		}
+		return ("<div class=\"item\"><a href='"
+				+ linkUrl
+				+ "'><button type=\"button\" class=\"btn btn-success btn-lg btn-block dropdown-toggle\" type=\"button\" id=\"menu1\" data-toggle=\"dropdown\">"
+				+ linkName
+				+ "<span class=\"caret\"></span></button>"
+				+ "</a><ul class=\"dropdown-menu\" role=\"menu\" aria-labelledby=\"menu1\"><li role=\"presentation\">"
+				+ "<a role=\"menuitem\" tabindex=\"-1\" href=\"#\">LOLAI</a></li>"
+				+ "<li role=\"presentation\" class=\"divider\"></li>"
+				+ "<li role=\"presentation\"><a role=\"menuitem\" tabindex=\"-1\" href=\""
+				+ linkUrl + "\">View on GitHub</a></li></div>");
 	}
 
 	public String returnFormFieldWithLabel(String formIdentifier,
