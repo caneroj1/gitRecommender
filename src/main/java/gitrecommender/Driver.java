@@ -27,7 +27,7 @@ public class Driver extends WebRequest {
 		page.print(processRecommendation(request.getQueryString()));
 		
 		page.print("<div class='col-md-10 col-md-offset-1'>");
-		page.print("<form method='post' action='/gitrecommender-2.88/' name='keyword-form' id='keyword-form' class='text-center form-horizontal'>");
+		page.print("<form method='post' action='/gitrecommender-3.6/' name='keyword-form' id='keyword-form' class='text-center form-horizontal'>");
 		page.print(returnFormFieldWithLabel("githubName", "GitHub Username", "Please enter your username"));
 		page.print("<br/>");
 		page.print(returnFormFieldWithLabel("keyword1", "Top Keyword", "This is your most desirable keyword"));
@@ -49,7 +49,7 @@ public class Driver extends WebRequest {
 	// this post request handles the form submission from the page. it basically takes all of the form parameters
 	// and throws them into a query string to be passed to the get request for this page.
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		String redirectUrl = "/gitrecommender-2.88/" + processFormSubmit(request);
+		String redirectUrl = "/gitrecommender-3.6/" + processFormSubmit(request);
 		
 		response.setStatus(HttpServletResponse.SC_SEE_OTHER);
 		response.setHeader("Location", redirectUrl);
@@ -116,18 +116,23 @@ public class Driver extends WebRequest {
 			html += "<div class='col-md-10 col-md-offset-1'>";
 			html += "<h3 class='text-center'>Recommendations for " + queryVars.get("githubName") + "</h3>";
 			int nearestNeighbors = 0;
+			Repository[] recommendations = new Repository[5];
 			while(nearestNeighbors < 5) {
 				int key = processedRepositories.firstKey();
 				for(Repository repo : processedRepositories.remove(key)) {
 					if(nearestNeighbors < 5) {
-						html += ("<p class='text-center'>" + (nearestNeighbors + 1) + ": " + createLink(repo.getName(), "https://github.com/" + repo.getName()) + "</p>");
+						html += ("\n<p class='text-center'>" + (nearestNeighbors + 1) + ": " + createLink(repo.getName(), "https://github.com/" + repo.getName()) + "</p>");
+						recommendations[nearestNeighbors] = repo;
 						nearestNeighbors += 1;
 					}
 				}
 			}
 			
-			html += "<canvas class='col-sm-6 col-sm-offset-3' id=\"languageChart\" width='500px' height='500px'></canvas>";
+			html += "\n<canvas class='col-sm-6 col-sm-offset-3' id=\"languageChart\" width='500px' height='500px'></canvas>\n";
 			html += donutChart;
+			
+			html += "\n<canvas class='col-sm-6 col-sm-offset-3' id=\"keywordsChart\" width='500px' height='500px'></canvas>\n";
+			html += makeBarChart(recommendations, treeKeywords);
 			
 			html += "</div>";
 		}

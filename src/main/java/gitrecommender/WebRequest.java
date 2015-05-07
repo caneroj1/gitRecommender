@@ -52,13 +52,57 @@ public class WebRequest extends HttpServlet{
 		return data;
 	}
 	
+	public String dataSectionForBarChart(Repository[] recommendations, String[] keywords) {
+		// total up the stuff
+		String data = "var data2 = {\n";
+		data += "\tlabels: [";
+		data += ("\"" + keywords[0] + "\",");
+		data += ("\"" + keywords[1] + "\",");
+		data += ("\"" + keywords[2] + "\",");
+		data += ("\"" + keywords[3] + "\",");
+		data += ("\"" + keywords[4] + "\"");
+		data += ("],\n\tdatasets: [\n");
+		data += ("\t\t{\n");
+		
+		int[] totals = new int[5];
+		boolean[] keywordsMatched;
+		
+		for(int i = 0; i < 5; i++) {
+			keywordsMatched = recommendations[i].getKeywordsMatched();
+			totals[0] += keywordsMatched[0] ? 1 : 0;
+			totals[1] += keywordsMatched[1] ? 1 : 0;
+			totals[2] += keywordsMatched[2] ? 1 : 0;
+			totals[3] += keywordsMatched[3] ? 1 : 0;
+			totals[4] += keywordsMatched[4] ? 1 : 0;
+		}
+		
+		data += "\t\t\tlabel: \"Keywords\",\n";
+        data += "\t\t\tfillColor: \"rgba(220,220,220,0.5)\",\n";
+        data += "\t\t\tstrokeColor: \"rgba(220,220,220,0.8)\",\n";
+        data += "\t\t\thighlightFill: \"rgba(220,220,220,0.75)\",\n";
+        data += "\t\t\thighlightStroke: \"rgba(220,220,220,1)\",\n";
+		data += "\t\t\tdata: [";
+		for(int i = 0; i < 4; i++) {
+			data += (totals[i] + ",");
+		}
+		data += (totals[4]) + "]\n\t\t}\n\t]\n};";
+		return data;
+	}
+	
 	public String makeDonutChart(HashMap<String, Double> languages) throws FileNotFoundException {
-		System.out.println("Inside 1");
-		System.out.println(languages.toString());
 		JSONObject languageColors = parseJSONFile("/colors.json");
 		String html = "<script>\nvar ctx = document.getElementById(\"languageChart\").getContext(\"2d\");\n";
 		html += dataSectionForDonutChart(languageColors, languages);
-		html += "var myLanguageChart = new Chart(ctx).Doughnut(data);";
+		html += "\nvar myLanguageChart = new Chart(ctx).Doughnut(data);";
+		
+		html += "</script>";
+		return html;
+	}
+
+	public String makeBarChart(Repository[] recommendations, String[] keywords) {
+		String html = "<script>\nvar ctx2 = document.getElementById(\"keywordsChart\").getContext(\"2d\");\n";
+		html += dataSectionForBarChart(recommendations, keywords);
+		html += "\nvar myKeywordsChart = new Chart(ctx2).Bar(data2);";
 		
 		html += "</script>";
 		return html;
