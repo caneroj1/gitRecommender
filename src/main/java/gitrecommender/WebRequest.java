@@ -2,11 +2,11 @@ package gitrecommender;
 
 import org.json.*;
 
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.text.DecimalFormat;
 import java.util.HashMap;
 
 import javax.servlet.ServletException;
@@ -33,6 +33,8 @@ public class WebRequest extends HttpServlet{
 	public String dataSectionForDonutChart(JSONObject languageColors, HashMap<String, Double> languages) {
 		String data = "var data = [\n";
 		
+		DecimalFormat formatter = new DecimalFormat("0.00");
+		
 		String[] langNames = languages.keySet().toArray(new String[0]);
 		String key, htmlColor;
 		System.out.println("Inside 2");
@@ -41,7 +43,7 @@ public class WebRequest extends HttpServlet{
 			data += "\t{\n";
 			key = langNames[i];
 			htmlColor = languageColors.getString(key);
-			data += ("\t\tvalue: " + languages.get(key).doubleValue()); 
+			data += ("\t\tvalue: " + formatter.format(languages.get(key).doubleValue())); 
 			data += (",\n\t\tcolor: \"" + htmlColor + "\"");
 			data += (",\n\t\thighlight: \"" + htmlColor + "\"");
 			data += (",\n\t\tlabel: \"" + key + "\"");
@@ -89,11 +91,11 @@ public class WebRequest extends HttpServlet{
 		return data;
 	}
 	
-	public String makeDonutChart(HashMap<String, Double> languages) throws FileNotFoundException {
+	public String makeDonutChart(HashMap<String, Double> languages, String id) throws FileNotFoundException {
 		JSONObject languageColors = parseJSONFile("/colors.json");
-		String html = "<script>\nvar ctx = document.getElementById(\"languageChart\").getContext(\"2d\");\n";
+		String html = "<script>\nvar ctx = document.getElementById(\"" + id + "\").getContext(\"2d\");\n";
 		html += dataSectionForDonutChart(languageColors, languages);
-		html += "\nvar myLanguageChart = new Chart(ctx).Doughnut(data);";
+		html += "\nvar " + id + "Chart = new Chart(ctx).Doughnut(data);";
 		
 		html += "</script>";
 		return html;
@@ -116,7 +118,6 @@ public class WebRequest extends HttpServlet{
         header.write("<meta charset=\"utf-8\">\n");
         header.write("<script src=\"https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js\"></script>");
         header.write("<link rel=\"stylesheet\" href=\"http://maxcdn.bootstrapcdn.com/bootswatch/3.3.4/paper/bootstrap.min.css\"></head>\n");
-        header.write("<link rel=\"stylesheet\" href=\"gitrecstyle.css\"></head>\n");
         header.write("<body>\n");
 
 		return header.toString();
@@ -127,15 +128,46 @@ public class WebRequest extends HttpServlet{
 
 		footer.write("<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js\"></script>");
 		footer.write("<script src=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js\"></script>");
-		footer.write("<script src=\"masonry.pkgd.min.js\"></script>");
-		footer.write("<script src=\"MasonryContainer.js\"></script>");
 		footer.write("</body></html>");
 
 		return footer.toString();
 	}
 
-	public String createDropdown(Repository repository) {
+	public String createDropdown(Repository repository, String id, String[] keywords) throws FileNotFoundException, IOException {
+		String html = "";
+		html += "<div class=\"panel panel-default\">";
+		html += "<div class=\"panel-heading\" role=\"tab\" id=\"heading" + id + "\">";
+		html += "<h4 class=\"panel-title\">";
+		html += "<a data-toggle=\"collapse\" data-parent=\"#accordion\" href=\"#" + id + "\" aria-expanded=\"true\" aria-controls=\"" + id + "\">" + repository.getName() + "</a>";
+		html += "</h4>";
+		html += "</div>";
+		html += "<div id=\"" + id + "\" class=\"panel-collapse collapse in\" role=\"tabpanel\" aria-labelledby=\"heading" + id + "\">";
+		html += "<div class=\"panel-body\">";
+		html += "<div class='col-md-12'>";
 		
+		// chart
+		html += "<div class='col-md-6'>";
+		html += "<h5 class='text-center'>Language Breakdown</h5>";
+		html += "\n<canvas id=\"" + id + "Chart\" width='220' height='220'></canvas>\n";
+		html += makeDonutChart(Recommender.computeLanguageRank(repository), id + "Chart");
+		html += "</div>";
+		
+		// other stuff
+		html += "<div class='col-md-6'>";
+		html += "<h4>Score: " + repository.getRecommenderScore() + "</h4>";
+		
+		boolean[] matched = repository.getKeywordsMatched();
+		for(int i = 0; i < 5; i++) {
+			if(matched[i]) { html += "<p>" + keywords[i] + "<span style='margin-left: 5%; color: green;' class ='glyphicon glyphicon-ok'></span></p>"; }
+			else { html += "<p>" + keywords[i] + "<span style='margin-left: 5%; color: red;' class ='glyphicon glyphicon-remove'></span></p>"; }
+		}
+		
+		html += "</div>";
+		html += "</div>";
+		html += "</div>";
+		html += "</div>";
+		html += "</div>";
+		return html;
 	}
 	
 	public String createLink(String linkName, String linkUrl, int priority) {
