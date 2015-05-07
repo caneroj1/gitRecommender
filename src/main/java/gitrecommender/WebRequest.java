@@ -46,9 +46,43 @@ public class WebRequest extends HttpServlet {
 		return footer.toString();
 	}
 
-	public String createLink(String linkName, String linkUrl) {
-		return ("<div id=\"masonryContainer\"><div class=\"item\"><a href='"
-				+ linkUrl + "'>" + linkName + "</a></div></div><!--<a class=text-center href= + linkUrl + > + linkName + </a>-->");
+	public String createLink(String linkName, String linkUrl, int priority) {
+		/*
+		 * <button type="button"
+		 * class="btn btn-success btn-lg btn-block">" + linkName + "</button>
+		 */
+
+		if (priority == 1) {
+			return ("<div class=\"span12\"><div class=\"item\"><a href='"
+					+ linkUrl
+					+ "'><button type=\"button\" class=\"btn btn-success btn-lg btn-block\">"
+					+ linkName + "</button>" + "</a></div></div><!--<a class=text-center href= + linkUrl + > + linkName + </a>-->");
+		} else if (priority == 2) {
+			return ("<div class=\"span10\"><div class=\"item\"><a href='"
+					+ linkUrl
+					+ "'><button type=\"button\" class=\"btn btn-success btn-lg btn-block\">"
+					+ linkName + "</button>" + "</a></div></div><!--<a class=text-center href= + linkUrl + > + linkName + </a>-->");
+		} else if (priority == 3) {
+			return ("<div class=\"span8\"><div class=\"item\"><a href='"
+					+ linkUrl
+					+ "'><button type=\"button\" class=\"btn btn-success btn-lg btn-block\">"
+					+ linkName + "</button>" + "</a></div></div><!--<a class=text-center href= + linkUrl + > + linkName + </a>-->");
+		} else if (priority == 4) {
+			return ("<div class=\"span6\"><div class=\"item\"><a href='"
+					+ linkUrl
+					+ "'><button type=\"button\" class=\"btn btn-success btn-lg btn-block\">"
+					+ linkName + "</button>" + "</a></div></div><!--<a class=text-center href= + linkUrl + > + linkName + </a>-->");
+		} else if (priority == 5) {
+			return ("<div class=\"span4\"><div class=\"item\"><a href='"
+					+ linkUrl
+					+ "'><button type=\"button\" class=\"btn btn-success btn-lg btn-block\">"
+					+ linkName + "</button>" + "</a></div></div><!--<a class=text-center href= + linkUrl + > + linkName + </a>-->");
+		} else {
+			return ("<div class=\"item\"><a href='"
+					+ linkUrl
+					+ "'><button type=\"button\" class=\"btn btn-success btn-lg btn-block\">"
+					+ linkName + "</button>" + "</a></div><!--<a class=text-center href= + linkUrl + > + linkName + </a>-->");
+		}
 	}
 
 	public String returnFormFieldWithLabel(String formIdentifier,
