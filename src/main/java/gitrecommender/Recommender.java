@@ -14,33 +14,49 @@ import java.util.Map;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GHUser;
 
-/* The Recommender class is a wrapper for the processing we do on each repository. Our k-nearest-neighbors implementation
+/* 
+ * The Recommender class is a wrapper for the processing we do on each repository. Our k-nearest-neighbors implementation
  * calculates the desirability of each repository using the methods contained in here.
  * The methods are basically all static, and do not require an instantiation of this class.
  */
+
 public class Recommender {
-	// PUBLIC METHODS
-	// ********************************************************************************
-	/*
+
+	/**
 	 * Calls all of the recommender functionality for a specified GitHub user
 	 * and a GitHub repo You need to pass in the keywords, and the language rank
 	 * for the GitHub user.
+	 * 
+	 * @param repository
+	 * @param userLanguageRank
+	 * @param keywords
+	 * @return
+	 * @throws IOException
 	 */
-	public static int distanceBetween(Repository repository, HashMap<String, Double> userLanguageRank, String[] keywords) throws IOException {
+	public static int distanceBetween(Repository repository,
+			HashMap<String, Double> userLanguageRank, String[] keywords)
+			throws IOException {
 		int languageDistance = computeLanguageDistance(userLanguageRank,
 				computeLanguageRank(repository));
 		int readmeDistance = analyzeReadme(repository, keywords);
 		int activityDistance = activity(repository);
 		int watchersDistance = mapWatchers(repository);
-		int recommenderScore = overallDistance(readmeDistance, languageDistance, activityDistance, watchersDistance);
+		int recommenderScore = overallDistance(readmeDistance,
+				languageDistance, activityDistance, watchersDistance);
 		repository.setRecommenderScore(recommenderScore);
 		return recommenderScore;
 	}
 
-	/*
+	/**
 	 * This is just the function where we compute the total distance that a
 	 * repository is from the user. In the future, we plan on changing it from
 	 * an unweighted sum to a weighted one, depending on user feedback.
+	 * 
+	 * @param readmeDistance
+	 * @param languageDistance
+	 * @param timeDifference
+	 * @param watchersRank
+	 * @return
 	 */
 	public static int overallDistance(int readmeDistance, int languageDistance,
 			int timeDifference, int watchersRank) {
@@ -48,7 +64,7 @@ public class Recommender {
 				+ watchersRank;
 	}
 
-	/*
+	/**
 	 * reads the readme for the specified repository. for each line it reads, it
 	 * regexes out all non-word characters, leaving only a-zA-Z0-9 while
 	 * replacing all instances of unwanted characters with spaces. next, it
@@ -59,6 +75,11 @@ public class Recommender {
 	 * each keyword mapping to a score of: 1st - 36 2nd - 28 3rd - 20 4th - 12
 	 * 5th - 4 the total of these scores - 100 is the rank of the repository in
 	 * terms of keyword matches
+	 * 
+	 * @param repository
+	 * @param keywords
+	 * @return
+	 * @throws IOException
 	 */
 	public static int analyzeReadme(Repository repository, String[] keywords)
 			throws IOException {
@@ -80,13 +101,13 @@ public class Recommender {
 			}
 		}
 		readmeReader.close();
-		
+
 		boolean[] keywordsMatched = new boolean[5];
-		
+
 		int[] scores = { 36, 28, 20, 12, 4 };
 		int repositoryScore = 0;
-		for(int i = 0; i < 5; i++) {
-			if(suffixTree.findWord(keywords[i])) {
+		for (int i = 0; i < 5; i++) {
+			if (suffixTree.findWord(keywords[i])) {
 				keywordsMatched[i] = true;
 				repositoryScore += scores[i];
 			}
@@ -98,31 +119,36 @@ public class Recommender {
 		return score;
 	}
 
-	/*
+	/**
 	 * computes the language rank of a given repo. The language rank of a repo
 	 * is basically what percentage of the total bytes written for a repo each
 	 * language constitutes. For example, if there were 20 bytes written total
 	 * for a repo, and ruby makes up 10, javascript makes up 5, and html makes
 	 * up 5, the language rank of the repo is: { ruby = 0.5, javascript= 0.25,
 	 * html = 0.25 }
+	 * 
+	 * @param repository
+	 * @return
+	 * @throws IOException
 	 */
-	public static HashMap<String, Double> computeLanguageRank(Repository repository) throws IOException {
+	public static HashMap<String, Double> computeLanguageRank(
+			Repository repository) throws IOException {
 		HashMap<String, String> languages = repository.getLanguages();
 		HashMap<String, Double> languageRank = new HashMap<String, Double>();
-		if(languages.isEmpty()) {
+		if (languages.isEmpty()) {
 			return new HashMap<String, Double>();
 		}
 
 		Iterator<String> iter = languages.values().iterator();
 
-		// total up the number of bytes written for the given repo
+		/* total up the number of bytes written for the given repo */
 		long totalBytes = 0;
 		while (iter.hasNext()) {
 			Long num = Long.parseLong(iter.next());
 			totalBytes += num.longValue();
 		}
 
-		// for each language, determine the percentage
+		/* for each language, determine the percentage */
 		for (String language : languages.keySet().toArray(new String[0])) {
 			Long temp = Long.parseLong(languages.get(language));
 			languageRank.put(language, (temp.doubleValue() / totalBytes));
@@ -131,30 +157,35 @@ public class Recommender {
 		return languageRank;
 	}
 
-	/*
+	/**
 	 * Basically the same as the method given above, but this computes the
 	 * language rank of a GitHub repository that is retrieved from the api,
 	 * instead of frm our database.
+	 * 
+	 * @param repository
+	 * @return
+	 * @throws IOException
 	 */
-	public static HashMap<String, Double> computeLanguageRankFromApi(GHRepository repository) throws IOException {
+	public static HashMap<String, Double> computeLanguageRankFromApi(
+			GHRepository repository) throws IOException {
 		System.out.println("Right here");
 		Map<String, Long> languages = repository.listLanguages();
 		HashMap<String, Double> languageRank = new HashMap<String, Double>();
 		System.out.println(languages);
-		
-		if(languages.isEmpty()) {
+
+		if (languages.isEmpty()) {
 			return new HashMap<String, Double>();
 		}
 		Iterator<Long> iter = languages.values().iterator();
 
-		// total up the number of bytes written for the given repo
+		/* total up the number of bytes written for the given repo */
 		long totalBytes = 0;
 		while (iter.hasNext()) {
 			Number temp = iter.next();
 			totalBytes += temp.longValue();
 		}
 
-		// for each language, determine the percentage
+		/* for each language, determine the percentage */
 		for (String language : languages.keySet().toArray(new String[0])) {
 			Number temp = languages.get(language);
 			languageRank.put(language, (temp.doubleValue() / totalBytes));
@@ -179,10 +210,12 @@ public class Recommender {
 	public static HashMap<String, Double> computeUserAverageLanguageRank(
 			GHUser user, int publicRepoCount) throws IOException {
 		HashMap<String, Double> averageLanguageRank = new HashMap<String, Double>();
-	
-		Iterator<GHRepository> iter = user.getRepositories().values().iterator();
-		while(iter.hasNext()) {
-			averageLanguageRank = mergeHashMaps(averageLanguageRank, computeLanguageRankFromApi(iter.next()));
+
+		Iterator<GHRepository> iter = user.getRepositories().values()
+				.iterator();
+		while (iter.hasNext()) {
+			averageLanguageRank = mergeHashMaps(averageLanguageRank,
+					computeLanguageRankFromApi(iter.next()));
 		}
 
 		for (String language : averageLanguageRank.keySet().toArray(
@@ -235,7 +268,12 @@ public class Recommender {
 		return runningSum.intValue();
 	}
 
-	// rank the repository's most recent activity in terms of desirability
+	/**
+	 * rank the repository's most recent activity in terms of desirability
+	 * 
+	 * @param repository
+	 * @return
+	 */
 	public static int activity(Repository repository) {
 		long daysSinceLastPush = timeDifference(repository.getPushedAt());
 		double normalized = normalize(daysSinceLastPush);
@@ -244,8 +282,13 @@ public class Recommender {
 		return activityRank;
 	}
 
-	// function to map a number of watchers for a repo to a value between 0 and
-	// 100
+	/**
+	 * function to map a number of watchers for a repo to a value between 0 and
+	 * 100
+	 * 
+	 * @param repository
+	 * @return
+	 */
 	public static int mapWatchers(Repository repository) {
 		int watchers = (Integer) repository.getWatchers();
 		if (watchers <= 1)
@@ -253,7 +296,12 @@ public class Recommender {
 		return (int) (100 / Math.log(watchers));
 	}
 
-	// returns a number of random repositories from the db
+	/**
+	 * returns a number of random repositories from the db
+	 * 
+	 * @param limit
+	 * @return
+	 */
 	public static List<Repository> getRandomRepositories(int limit) {
 		Long count = Repository.count();
 		List<Repository> randomRepos = Repository
@@ -262,10 +310,13 @@ public class Recommender {
 		return randomRepos;
 	}
 
-	// PRIVATE METHODS
-	// ********************************************************************************
-	// compute the time difference in days between the last push to the
-	// repository and the current time.
+	/**
+	 * compute the time difference in days between the last push to the
+	 * repository and the current time.
+	 * 
+	 * @param pushTime
+	 * @return
+	 */
 	private static long timeDifference(Date pushTime) {
 		Date currentTime = new Date();
 		long difference = currentTime.getTime();
@@ -275,16 +326,26 @@ public class Recommender {
 		return difference / secondsToDaysFactor;
 	}
 
-	// function normalize some value between 0 and 1
+	/**
+	 * function normalize some value between 0 and 1
+	 * 
+	 * @param value
+	 * @return
+	 */
 	private static double normalize(long value) {
 		if (value < 1)
 			return 0;
 		return (1 - Math.exp(-Math.log10(value)));
 	}
 
-	// merges two hash maps. it adds values from the two hashes if both hashes
-	// have the corresponding key, otherwise we just
-	// union the new value in.
+	/**
+	 * merges two hash maps. it adds values from the two hashes if both hashes
+	 * have the corresponding key, otherwise we just union the new value in.
+	 * 
+	 * @param previous
+	 * @param next
+	 * @return
+	 */
 	private static HashMap<String, Double> mergeHashMaps(
 			HashMap<String, Double> previous, HashMap<String, Double> next) {
 		HashMap<String, Double> newMap = new HashMap<String, Double>();
@@ -302,10 +363,11 @@ public class Recommender {
 			newMap.put(language, newNumber);
 		}
 
-		// if there is anything contained in the next hash that is not in the
-		// previous hash, we need to add it in to the
-		// new map now because it would not have been added in the previous
-		// section
+		/*
+		 * if there is anything contained in the next hash that is not in the
+		 * previous hash, we need to add it in to the new map now because it
+		 * would not have been added in the previous section
+		 */
 		for (String language : next.keySet().toArray(new String[0])) {
 			Number languageNumber = next.remove(language);
 			newMap.put(language, languageNumber.doubleValue());
@@ -313,4 +375,5 @@ public class Recommender {
 
 		return newMap;
 	}
+
 }

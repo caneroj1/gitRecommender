@@ -1,6 +1,10 @@
-// package gitrecommender.decisionTree;
+package gitrecommender;
 
 public class DateCommitted extends Attribute {
+
+	/**
+	 * @param i
+	 */
 	public DateCommitted(int i) {
 		len = 4;
 		index = i;
@@ -13,4 +17,5 @@ public class DateCommitted extends Attribute {
 		choice = options[i];
 		type = "DateCommitted";
 	}
+
 }

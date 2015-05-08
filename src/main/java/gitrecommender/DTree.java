@@ -1,9 +1,9 @@
-// package gitrecommender.decisionTree;
-import java.util.Calendar;
-import java.util.TimeZone;
+package gitrecommender;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Random;
+import java.util.TimeZone;
 import java.util.Vector;
 
 public class DTree<T> {
@@ -17,6 +17,9 @@ public class DTree<T> {
 		this.parent = dTree.getParent();
 	}
 
+	/**
+	 * @param element
+	 */
 	public DTree(Node<T> element) {
 		this.parent = element;
 	}
@@ -36,14 +39,27 @@ public class DTree<T> {
 		this.parent = parent;
 	}
 
+	/**
+	 * @return
+	 */
 	public ArrayList<Node<T>> getChildren() {
 		return parent.getChildren();
 	}
 
+	/**
+	 * @param index
+	 * @return
+	 */
 	public Node<T> getChild(int index) {
 		return parent.getChild(index);
 	}
 
+	/**
+	 * @param examples
+	 * @param attributes
+	 * @param parentExamples
+	 * @return
+	 */
 	public DTree decisionTreeLearning(ArrayList<Example> examples,
 			ArrayList<Attribute> attributes, ArrayList<Example> parentExamples) {
 		boolean check = true;
@@ -87,7 +103,7 @@ public class DTree<T> {
 				}
 			}
 
-			// Dis be where recursion happens
+			/* Recursive Part of Method */
 			System.out.println("High: " + high);
 			Node<Attribute> tmpNode = new Node<Attribute>(high);
 			DTree<Attribute> tmp = new DTree<Attribute>(tmpNode);
@@ -96,9 +112,6 @@ public class DTree<T> {
 				for (int j = 0; j < examples.size(); j++) {
 					if (examples.get(j).getChoice(high)
 							.equals(high.getOptions()[high.getIndex()])) {
-						// System.out.println(examples.get(j));
-						// System.out.println(examples.get(j).getChoice(high));
-						// System.out.println(high.getOptions()[high.getIndex()]);
 						newExs.add(examples.get(j));
 					}
 				}
@@ -115,6 +128,10 @@ public class DTree<T> {
 
 	}
 
+	/**
+	 * @param examples
+	 * @return
+	 */
 	public static DTree<Attribute> getPlurality(ArrayList<Example> examples) {
 		int trueCount = 0;
 		int falseCount = 0;
@@ -147,10 +164,19 @@ public class DTree<T> {
 
 	}
 
+	/**
+	 * @param q
+	 * @return
+	 */
 	public static double entropy(double q) {
 		return -1 * (q * Logarithm.log2(q) + (1 - q) * Logarithm.log2(1 - q));
 	}
 
+	/**
+	 * @param e
+	 * @param toCheck
+	 * @return
+	 */
 	public static double remainder(Example[] e, String toCheck) {
 		double sum = 0;
 		double one = 0;
@@ -165,10 +191,6 @@ public class DTree<T> {
 		if (toCheck != null) {
 			if (toCheck.equals("KeywordRange")) {
 				for (Example ex : e) {
-					/*
-					 * "zerothirty", "thirtyfifty", "fiftyeighty",
-					 * "eightyonehundred"
-					 */
 					int num = ex.getKeywordRange().getIndex();
 					if (num == 1) {
 						one += 1;
@@ -346,6 +368,10 @@ public class DTree<T> {
 		return sum;
 	}
 
+	/**
+	 * @param e
+	 * @return
+	 */
 	public static double goalEntropy(Example[] e) {
 		double posNum = 0;
 
@@ -358,10 +384,18 @@ public class DTree<T> {
 		return entropy(posNum / e.length);
 	}
 
+	/**
+	 * @param e
+	 * @param toCheck
+	 * @return
+	 */
 	public static double informationGain(Example[] e, String toCheck) {
 		return goalEntropy(e) - remainder(e, toCheck);
 	}
 
+	/**
+	 * @return
+	 */
 	public ArrayList<T> levelorder() {
 		Vector<Node<T>> nodeQueue = new Vector<Node<T>>();
 		ArrayList<T> iter = new ArrayList<T>();
@@ -382,32 +416,36 @@ public class DTree<T> {
 		return iter;
 	}
 
+	/**
+	 * @param watchers
+	 * @param keyword
+	 * @param date
+	 * @return
+	 */
 	public String queryTree(int watchers, int keyword, long date) {
-		Node<Attribute> tempNode = (Node<Attribute>)this.parent;
+		Node<Attribute> tempNode = (Node<Attribute>) this.parent;
 		String type;
 
-		while(!tempNode.getElement().getType().equals("BooleanAttribute")) {
+		while (!tempNode.getElement().getType().equals("BooleanAttribute")) {
 			type = tempNode.getElement().getType();
-
-			switch(type) {
-				case("BooleanAttribute"):
-					break;
-				case("DateCommitted"):
-					tempNode = switchOnDateNode(date, tempNode.getChildren());
-					break;
-				case("KeywordRange"):
-					tempNode = switchOnKeywordNode(keyword, tempNode.getChildren());
-					break;
-				case("StarRange"):
-					tempNode = switchOnStarNode(watchers, tempNode.getChildren());
-					break;
-			}
+			if (type.equals("DateCommitted"))
+				tempNode = switchOnDateNode(date, tempNode.getChildren());
+			else if (type.equals("KeywordRange"))
+				tempNode = switchOnKeywordNode(keyword, tempNode.getChildren());
+			else if (type.equals("StarRange"))
+				tempNode = switchOnStarNode(watchers, tempNode.getChildren());
 		}
 
 		return tempNode.getElement().getChoice();
 	}
 
-	private Node<Attribute> switchOnDateNode(long date, ArrayList<Node<Attribute>> children) {
+	/**
+	 * @param date
+	 * @param children
+	 * @return
+	 */
+	private Node<Attribute> switchOnDateNode(long date,
+			ArrayList<Node<Attribute>> children) {
 		Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
 		long lastCommit = cal.getTimeInMillis() / 1000L - date;
 
@@ -422,22 +460,50 @@ public class DTree<T> {
 		}
 	}
 
-	private Node<Attribute> switchOnKeywordNode(int keywords, ArrayList<Node<Attribute>> children) {
-		if(keywords < 30) return (Node<Attribute>) children.get(0);
-		else if(keywords < 50) return (Node<Attribute>) children.get(1);
-		else if(keywords < 80) return (Node<Attribute>) children.get(2);
-		else return (Node<Attribute>) children.get(3);
+	/**
+	 * @param keywords
+	 * @param children
+	 * @return
+	 */
+	private Node<Attribute> switchOnKeywordNode(int keywords,
+			ArrayList<Node<Attribute>> children) {
+		if (keywords < 30)
+			return (Node<Attribute>) children.get(0);
+		else if (keywords < 50)
+			return (Node<Attribute>) children.get(1);
+		else if (keywords < 80)
+			return (Node<Attribute>) children.get(2);
+		else
+			return (Node<Attribute>) children.get(3);
 	}
 
-	private Node<Attribute> switchOnStarNode(int stars, ArrayList<Node<Attribute>> children) {
-		if(stars < 50) return (Node<Attribute>) children.get(0);
-		else if(stars < 100) return (Node<Attribute>) children.get(1);
-		else if(stars < 500) return (Node<Attribute>) children.get(2);
-		else return (Node<Attribute>) children.get(3);
+	/**
+	 * @param stars
+	 * @param children
+	 * @return
+	 */
+	private Node<Attribute> switchOnStarNode(int stars,
+			ArrayList<Node<Attribute>> children) {
+		if (stars < 50)
+			return (Node<Attribute>) children.get(0);
+		else if (stars < 100)
+			return (Node<Attribute>) children.get(1);
+		else if (stars < 500)
+			return (Node<Attribute>) children.get(2);
+		else
+			return (Node<Attribute>) children.get(3);
 	}
 
-	private Node<Attribute> switchOnLikedNode(boolean liked, ArrayList<Node<Attribute>> children) {
-		if(liked) return (Node<Attribute>) children.get(1);
-		else return (Node<Attribute>) children.get(0);
+	/**
+	 * @param liked
+	 * @param children
+	 * @return
+	 */
+	private Node<Attribute> switchOnLikedNode(boolean liked,
+			ArrayList<Node<Attribute>> children) {
+		if (liked)
+			return (Node<Attribute>) children.get(1);
+		else
+			return (Node<Attribute>) children.get(0);
 	}
 }

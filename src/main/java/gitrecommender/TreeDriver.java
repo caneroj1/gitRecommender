@@ -1,23 +1,34 @@
-// package gitrecommender.decisionTree;
+package gitrecommender;
 
 import java.io.BufferedReader;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Random;
-import java.util.Date;
 import java.util.TimeZone;
 
+/**
+ *
+ */
 public class TreeDriver {
-	public static void run() throws IOException {
+
+	/**
+	 * @param repoWatchers
+	 * @param keywordScore
+	 * @param seconds
+	 * @return
+	 * @throws IOException
+	 */
+	public String run(int repoWatchers, int keywordScore, long seconds)
+			throws IOException {
 
 		ArrayList<Example> examples = new ArrayList<Example>();
 		ArrayList<Attribute> attributes = new ArrayList<Attribute>();
 
-		InputStream str = new FileInputStream("./training_data_set_1.txt");
+		InputStream str = getClass().getResourceAsStream(
+				"/training_data_set_1.txt");
 		BufferedReader in = new BufferedReader(new InputStreamReader(str,
 				"UTF-8"));
 		String inputLine = "";
@@ -95,9 +106,11 @@ public class TreeDriver {
 
 		DTree learnedTree = tree.decisionTreeLearning(examples, attributes,
 				examples);
-		long seconds = new Date().getTime();
-		seconds /= 1000;
-		String result = learnedTree.queryTree(35700, 20, seconds);
+
+		String result = learnedTree.queryTree(repoWatchers, keywordScore,
+				seconds);
 		System.out.println("Querying tree. Result: " + result);
+		return result;
 	}
+
 }

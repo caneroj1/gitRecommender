@@ -1,8 +1,11 @@
-// package gitrecommender.decisionTree;
+package gitrecommender;
 
 public class LikedRepo extends Attribute {
 	private boolean likedRepo = false;
 
+	/**
+	 * @param i
+	 */
 	public LikedRepo(int i) {
 		len = 2;
 		options = new String[len];
@@ -18,6 +21,11 @@ public class LikedRepo extends Attribute {
 		choice = options[i];
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see gitrecommender.Attribute#getIndex()
+	 */
 	@Override
 	public int getIndex() {
 		if (likedRepo) {

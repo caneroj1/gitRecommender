@@ -43,3 +43,5 @@ ruby_scripts/.env
 /target/
 /target/
 /target/
+
+.class

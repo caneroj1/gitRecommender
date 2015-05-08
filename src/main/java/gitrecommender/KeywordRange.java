@@ -1,7 +1,10 @@
-// package gitrecommender.decisionTree;
+package gitrecommender;
 
 public class KeywordRange extends Attribute {
 
+	/**
+	 * @param i
+	 */
 	public KeywordRange(int i) {
 		len = 4;
 		options = new String[len];
@@ -15,4 +18,5 @@ public class KeywordRange extends Attribute {
 		choice = options[i];
 		type = "KeywordRange";
 	}
+
 }

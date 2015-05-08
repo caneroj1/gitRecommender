@@ -1,4 +1,4 @@
-// package gitrecommender.decisionTree;
+package gitrecommender;
 
 import java.util.ArrayList;
 
@@ -45,27 +45,49 @@ public class Node<T> {
 		this.children = children;
 	}
 
+	/**
+	 * @param child
+	 */
 	public void addChild(Node child) {
 		children.add(child);
 	}
 
+	/**
+	 * @param index
+	 * @return
+	 */
 	public Node<T> getChild(int index) {
 		return children.get(index);
 	}
 
+	/**
+	 * @param index
+	 */
 	public void deleteChild(int index) {
 		children.remove(index);
 	}
 
+	/**
+	 * 
+	 */
 	public void clearChildren() {
 		children.clear();
 	}
 
+	/**
+	 * @return
+	 */
 	public int getChildCount() {
 		return children.size();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#toString()
+	 */
 	public String toString() {
 		return "Element: " + element;
 	}
+
 }

@@ -21,9 +21,12 @@ NEW_REPO_TRAINING_DATA_COUNT = 20
 
 def compile_training_data(response, liked)
   puts "Processing #{response[:full_name]}"
-  data = { liked: liked }
+
+  @client.stargazers(response[:full_name])
+
+  data            = { liked: liked }
   data[:id]       = response[:id]
-  data[:watchers] = response[:watchers]
+  data[:watchers] = get_number_of_watchers(@client.last_response)
   data[:commit]   = get_last_commit_time(response[:full_name]).strftime('%s')
   data[:language] = get_languages(@client.languages(response[:full_name])).to_a.max { |a, b| a[1] <=> b[1] }
   data[:language] = data[:language][0] unless data[:language].nil?

@@ -1,8 +1,7 @@
-// package gitrecommender.decisionTree;
+package gitrecommender;
 
 public class Example {
 
-	/* keywordrange, datecommitted, starrange, userlike */
 	private KeywordRange keywordRange;
 	private DateCommitted dateCommitted;
 	private StarRange starRange;
@@ -26,6 +25,10 @@ public class Example {
 		this.showRepo = showRepo;
 	}
 
+	/**
+	 * @param attri
+	 * @return
+	 */
 	public String getChoice(Attribute attri) {
 		String type = attri.getType();
 		if (type.equals("DateCommitted")) {
@@ -118,6 +121,11 @@ public class Example {
 		this.showRepo = showRepo;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#toString()
+	 */
 	public String toString() {
 		String str = "keywordRange : " + keywordRange.toString();
 		str += "\ndateCommitted: " + dateCommitted.toString();

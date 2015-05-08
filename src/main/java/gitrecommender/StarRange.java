@@ -1,6 +1,10 @@
-// package gitrecommender.decisionTree;
+package gitrecommender;
 
 public class StarRange extends Attribute {
+
+	/**
+	 * @param i
+	 */
 	public StarRange(int i) {
 		len = 4;
 		index = i;
@@ -13,4 +17,5 @@ public class StarRange extends Attribute {
 		choice = options[i];
 		type = "StarRange";
 	}
+
 }

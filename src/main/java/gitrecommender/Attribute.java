@@ -1,3 +1,5 @@
+package gitrecommender;
+
 import java.util.Arrays;
 
 public class Attribute {
@@ -13,24 +15,36 @@ public class Attribute {
 	protected String choice;
 
 	/**
-	 * @return the index
+	 * @return
 	 */
 	public int getIndex() {
 		return index;
 	}
 
+	/**
+	 * @return
+	 */
 	public int getLen() {
 		return len;
 	}
 
+	/**
+	 * @return
+	 */
 	public String[] getOptions() {
 		return options;
 	}
 
+	/**
+	 * @return
+	 */
 	public String getType() {
 		return type;
 	}
 
+	/**
+	 * @return
+	 */
 	public String getChoice() {
 		return choice;
 	}

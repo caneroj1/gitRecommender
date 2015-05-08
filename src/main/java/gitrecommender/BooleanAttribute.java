@@ -1,6 +1,10 @@
-// package gitrecommender.decisionTree;
+package gitrecommender;
 
 public class BooleanAttribute extends Attribute {
+
+	/**
+	 * @param i
+	 */
 	public BooleanAttribute(int i) {
 		len = 2;
 		options = new String[len];
@@ -11,4 +15,5 @@ public class BooleanAttribute extends Attribute {
 		choice = options[i];
 		type = "BooleanAttribute";
 	}
+
 }
