@@ -10,7 +10,10 @@ import java.util.Random;
 import java.util.TimeZone;
 
 /**
- *
+ * This is the driver class that will run the decisionTreeLearning algorithm and
+ * build our decision tree. It does this by reading in from a text file, and the
+ * nearest neighbors using that data to define the attributes that belong to the
+ * training data.
  */
 public class TreeDriver {
 

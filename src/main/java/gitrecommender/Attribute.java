@@ -2,6 +2,11 @@ package gitrecommender;
 
 import java.util.Arrays;
 
+/**
+ * The parent class of the attributes of KeywordRange, DateCommited, StarRange
+ * and LikedRepo. It provides information that is applicable to all *
+ * attributes, and can be extended to future attributes.
+ */
 public class Attribute {
 
 	/**

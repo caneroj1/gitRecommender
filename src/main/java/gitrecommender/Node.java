@@ -2,12 +2,23 @@ package gitrecommender;
 
 import java.util.ArrayList;
 
+/**
+ * A node class that uses Java generics to describe a node in our DTree<T>. It
+ * includes an element and an arraylist of Nodes<T> that are the associated
+ * nodes children.
+ * 
+ * @param <T>
+ */
 public class Node<T> {
 
 	protected T element;
 	protected ArrayList<Node<T>> children;
 
 	/**
+	 * Constructor Passes in an element of generic type T, and assigns it to the
+	 * element that resides within the node. It also assigns the children to the
+	 * nodes ArrayList.
+	 * 
 	 * @param element
 	 */
 	public Node(T element) {
@@ -46,6 +57,8 @@ public class Node<T> {
 	}
 
 	/**
+	 * adds a child to Node that calls this method
+	 * 
 	 * @param child
 	 */
 	public void addChild(Node child) {
@@ -61,6 +74,9 @@ public class Node<T> {
 	}
 
 	/**
+	 * deletes a child of the Node that calls this method; removes it from the
+	 * ArrayList that holds the children.
+	 * 
 	 * @param index
 	 */
 	public void deleteChild(int index) {
@@ -68,13 +84,15 @@ public class Node<T> {
 	}
 
 	/**
-	 * 
+	 * Clears all the children from a node.
 	 */
 	public void clearChildren() {
 		children.clear();
 	}
 
 	/**
+	 * Counts all the children of a given node and returns that integer.
+	 * 
 	 * @return
 	 */
 	public int getChildCount() {
@@ -82,9 +100,7 @@ public class Node<T> {
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Object#toString()
+	 * This merely is the toString method for a Node.
 	 */
 	public String toString() {
 		return "Element: " + element;

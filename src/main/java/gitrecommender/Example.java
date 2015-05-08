@@ -1,5 +1,10 @@
 package gitrecommender;
 
+/**
+ * Defines an example object that will be used for the decision tree to learn
+ * from. It contains attributes and a Boolean that will yield if we show it or
+ * not.
+ */
 public class Example {
 
 	private KeywordRange keywordRange;
@@ -26,6 +31,9 @@ public class Example {
 	}
 
 	/**
+	 * Finds the particular choice for an attribute that is contained within the
+	 * example.
+	 * 
 	 * @param attri
 	 * @return
 	 */

@@ -6,11 +6,21 @@ import java.util.Random;
 import java.util.TimeZone;
 import java.util.Vector;
 
+/**
+ * This is our decision tree class that defines the algorithm required to
+ * implement our recursive decision tree learning algorithm. The tree is built
+ * upon a set of examples that acts as our training data.
+ * 
+ * @param <T>
+ */
 public class DTree<T> {
 
 	protected Node<T> parent;
 
 	/**
+	 * The constructors are able to be passed either a DTree or a Node in order
+	 * to instantiate the DTree.
+	 * 
 	 * @param dTree
 	 */
 	public DTree(DTree<T> dTree) {
@@ -18,6 +28,9 @@ public class DTree<T> {
 	}
 
 	/**
+	 * The constructors are able to be passed either a DTree or a Node in order
+	 * to instantiate the DTree.
+	 * 
 	 * @param element
 	 */
 	public DTree(Node<T> element) {
@@ -55,6 +68,20 @@ public class DTree<T> {
 	}
 
 	/**
+	 * decisionTree Learning Method : This is our recursive algorithm that
+	 * develops and iterates upon a DTree. It checks to see if the parameters
+	 * are empty, and then it calls the pluralityValue method to calculate an
+	 * answer for our decision tree, or returns a positive or negative Boolean
+	 * leaf if all examples given are positive or negative, respectively.
+	 * Otherwise, we begin our algorithm by finding the maximum information gain
+	 * of the attributes that were given in our example training set. The
+	 * recursive step then begins by making our tree based on the max importance
+	 * of the attributes and starting with that at the root. Then for each
+	 * choice for that attribute, generate a new array of examples from the
+	 * original examples that have that choice, and then call the algorithm in
+	 * the recursive loop. Then add a branch to the tree with that choice and
+	 * return the tree.
+	 * 
 	 * @param examples
 	 * @param attributes
 	 * @param parentExamples
@@ -129,6 +156,12 @@ public class DTree<T> {
 	}
 
 	/**
+	 * This method merely returns the majority value of previous. They would
+	 * have said the majority class if there were only two classes. Plurality is
+	 * just the generalization of majority to more than 2 classes. It just means
+	 * take the most frequent class in that leaf and return that as the
+	 * prediction.
+	 * 
 	 * @param examples
 	 * @return
 	 */
@@ -165,6 +198,8 @@ public class DTree<T> {
 	}
 
 	/**
+	 * The formula for calculating the entropy of a random variable.
+	 * 
 	 * @param q
 	 * @return
 	 */
@@ -173,6 +208,9 @@ public class DTree<T> {
 	}
 
 	/**
+	 * Calculating the remainder that will be used in the information gain
+	 * calculation.
+	 * 
 	 * @param e
 	 * @param toCheck
 	 * @return
@@ -385,6 +423,9 @@ public class DTree<T> {
 	}
 
 	/**
+	 * Calculates the entropy of our goal by calculating the entropy of the
+	 * given example – the remainder from that particular example
+	 * 
 	 * @param e
 	 * @param toCheck
 	 * @return
@@ -417,6 +458,10 @@ public class DTree<T> {
 	}
 
 	/**
+	 * This will query our decision tree and ask what type of node it is to
+	 * determine the attribute. They call the switchOnAttribute functions below,
+	 * which merely return the value associated with the options and children.
+	 * 
 	 * @param watchers
 	 * @param keyword
 	 * @param date

@@ -1,8 +1,14 @@
 package gitrecommender;
 
+/**
+ * Defines the attribute of when a repository was last committed to on Github.
+ */
 public class DateCommitted extends Attribute {
 
 	/**
+	 * Constructor Assigns the proper index, options, and type that specify this
+	 * object as a DateCommitted Attribute.
+	 * 
 	 * @param i
 	 */
 	public DateCommitted(int i) {
