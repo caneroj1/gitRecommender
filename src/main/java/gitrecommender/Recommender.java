@@ -26,17 +26,15 @@ public class Recommender {
 	 * and a GitHub repo You need to pass in the keywords, and the language rank
 	 * for the GitHub user.
 	 */
-	public static int distanceBetween(Repository repository,
-			HashMap<String, Double> userLanguageRank, String[] keywords)
-			throws IOException {
+	public static int distanceBetween(Repository repository, HashMap<String, Double> userLanguageRank, String[] keywords) throws IOException {
 		int languageDistance = computeLanguageDistance(userLanguageRank,
 				computeLanguageRank(repository));
 		int readmeDistance = analyzeReadme(repository, keywords);
 		int activityDistance = activity(repository);
 		int watchersDistance = mapWatchers(repository);
-
-		return overallDistance(readmeDistance, languageDistance,
-				activityDistance, watchersDistance);
+		int recommenderScore = overallDistance(readmeDistance, languageDistance, activityDistance, watchersDistance);
+		repository.setRecommenderScore(recommenderScore);
+		return recommenderScore;
 	}
 
 	/*
@@ -82,17 +80,21 @@ public class Recommender {
 			}
 		}
 		readmeReader.close();
-
+		
+		boolean[] keywordsMatched = new boolean[5];
+		
 		int[] scores = { 36, 28, 20, 12, 4 };
 		int repositoryScore = 0;
-		for (int i = 0; i < 5; i++) {
-			if (suffixTree.findWord(keywords[i])) {
+		for(int i = 0; i < 5; i++) {
+			if(suffixTree.findWord(keywords[i])) {
+				keywordsMatched[i] = true;
 				repositoryScore += scores[i];
 			}
 		}
 
 		int score = 100 - repositoryScore;
 		repository.setKeywordsScore(score);
+		repository.setKeywordsMatched(keywordsMatched);
 		return score;
 	}
 
@@ -104,11 +106,10 @@ public class Recommender {
 	 * up 5, the language rank of the repo is: { ruby = 0.5, javascript= 0.25,
 	 * html = 0.25 }
 	 */
-	public static HashMap<String, Double> computeLanguageRank(
-			Repository repository) throws IOException {
+	public static HashMap<String, Double> computeLanguageRank(Repository repository) throws IOException {
 		HashMap<String, String> languages = repository.getLanguages();
 		HashMap<String, Double> languageRank = new HashMap<String, Double>();
-		if (languageRank.isEmpty()) {
+		if(languages.isEmpty()) {
 			return new HashMap<String, Double>();
 		}
 
@@ -135,11 +136,13 @@ public class Recommender {
 	 * language rank of a GitHub repository that is retrieved from the api,
 	 * instead of frm our database.
 	 */
-	public static HashMap<String, Double> computeLanguageRank(
-			GHRepository repository) throws IOException {
+	public static HashMap<String, Double> computeLanguageRankFromApi(GHRepository repository) throws IOException {
+		System.out.println("Right here");
 		Map<String, Long> languages = repository.listLanguages();
 		HashMap<String, Double> languageRank = new HashMap<String, Double>();
-		if (languageRank.isEmpty()) {
+		System.out.println(languages);
+		
+		if(languages.isEmpty()) {
 			return new HashMap<String, Double>();
 		}
 		Iterator<Long> iter = languages.values().iterator();
@@ -176,12 +179,10 @@ public class Recommender {
 	public static HashMap<String, Double> computeUserAverageLanguageRank(
 			GHUser user, int publicRepoCount) throws IOException {
 		HashMap<String, Double> averageLanguageRank = new HashMap<String, Double>();
-
-		Iterator<GHRepository> iter = user.getRepositories().values()
-				.iterator();
-		while (iter.hasNext()) {
-			averageLanguageRank = mergeHashMaps(averageLanguageRank,
-					computeLanguageRank(iter.next()));
+	
+		Iterator<GHRepository> iter = user.getRepositories().values().iterator();
+		while(iter.hasNext()) {
+			averageLanguageRank = mergeHashMaps(averageLanguageRank, computeLanguageRankFromApi(iter.next()));
 		}
 
 		for (String language : averageLanguageRank.keySet().toArray(

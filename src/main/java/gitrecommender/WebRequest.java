@@ -1,7 +1,12 @@
 package gitrecommender;
 
+import org.json.*;
+
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringWriter;
+import java.text.DecimalFormat;
 import java.util.HashMap;
 
 import javax.servlet.ServletException;
@@ -10,25 +15,110 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 @SuppressWarnings("serial")
-public class WebRequest extends HttpServlet {
-	protected void doGet(HttpServletRequest request,
-			HttpServletResponse response) throws ServletException, IOException {
+public class WebRequest extends HttpServlet{
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		// implement in inherited classes
+	}
+	
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		// implement in inherited classes
+	}
+	
+	public JSONObject parseJSONFile(String filepath) throws FileNotFoundException {
+//		InputStream stream = new FileInputStream(filepath);
+		InputStream stream = getClass().getResourceAsStream(filepath);
+		return new JSONObject(new JSONTokener(stream));
+	}
+	
+	public String dataSectionForDonutChart(JSONObject languageColors, HashMap<String, Double> languages) {
+		String data = "var data = [\n";
+		
+		DecimalFormat formatter = new DecimalFormat("0.00");
+		
+		String[] langNames = languages.keySet().toArray(new String[0]);
+		String key, htmlColor;
+		System.out.println("Inside 2");
+		System.out.println(languages.toString());
+		for(int i = 0; i < languages.size(); i++) {
+			data += "\t{\n";
+			key = langNames[i];
+			htmlColor = languageColors.getString(key);
+			data += ("\t\tvalue: " + formatter.format(languages.get(key).doubleValue())); 
+			data += (",\n\t\tcolor: \"" + htmlColor + "\"");
+			data += (",\n\t\thighlight: \"" + htmlColor + "\"");
+			data += (",\n\t\tlabel: \"" + key + "\"");
+			if(i != languages.size() - 1) { data += ("\n\t},\n"); }
+			else { data += ("\n\t}\n"); }
+		}
+		data += "];\n";
+		return data;
+	}
+	
+	public String dataSectionForBarChart(Repository[] recommendations, String[] keywords) {
+		// total up the stuff
+		String data = "var data2 = {\n";
+		data += "\tlabels: [";
+		data += ("\"" + keywords[0] + "\",");
+		data += ("\"" + keywords[1] + "\",");
+		data += ("\"" + keywords[2] + "\",");
+		data += ("\"" + keywords[3] + "\",");
+		data += ("\"" + keywords[4] + "\"");
+		data += ("],\n\tdatasets: [\n");
+		data += ("\t\t{\n");
+		
+		int[] totals = new int[5];
+		boolean[] keywordsMatched;
+		
+		for(int i = 0; i < 5; i++) {
+			keywordsMatched = recommendations[i].getKeywordsMatched();
+			totals[0] += keywordsMatched[0] ? 1 : 0;
+			totals[1] += keywordsMatched[1] ? 1 : 0;
+			totals[2] += keywordsMatched[2] ? 1 : 0;
+			totals[3] += keywordsMatched[3] ? 1 : 0;
+			totals[4] += keywordsMatched[4] ? 1 : 0;
+		}
+		
+		data += "\t\t\tlabel: \"Keywords\",\n";
+        data += "\t\t\tfillColor: \"rgba(151,187,205,0.5)\",\n";
+        data += "\t\t\tstrokeColor: \"rgba(151,187,205,0.5)\",\n";
+        data += "\t\t\thighlightFill: \"rgba(151,187,205,0.5)\",\n";
+        data += "\t\t\thighlightStroke: \"rgba(151,187,205,1)\",\n";
+		data += "\t\t\tdata: [";
+		for(int i = 0; i < 4; i++) {
+			data += (totals[i] + ",");
+		}
+		data += (totals[4]) + "]\n\t\t}\n\t]\n};";
+		return data;
+	}
+	
+	public String makeDonutChart(HashMap<String, Double> languages, String id) throws FileNotFoundException {
+		JSONObject languageColors = parseJSONFile("/colors.json");
+		String html = "<script>\nvar ctx = document.getElementById(\"" + id + "\").getContext(\"2d\");\n";
+		html += dataSectionForDonutChart(languageColors, languages);
+		html += "\nvar " + id + "Chart = new Chart(ctx).Doughnut(data);";
+		
+		html += "</script>";
+		return html;
 	}
 
-	protected void doPost(HttpServletRequest request,
-			HttpServletResponse response) throws ServletException, IOException {
+	public String makeBarChart(Repository[] recommendations, String[] keywords) {
+		String html = "<script>\nvar ctx2 = document.getElementById(\"keywordsChart\").getContext(\"2d\");\n";
+		html += dataSectionForBarChart(recommendations, keywords);
+		html += "\nvar myKeywordsChart = new Chart(ctx2).Bar(data2);";
+		
+		html += "</script>";
+		return html;
 	}
 
 	public String returnHeader() {
 		StringWriter header = new StringWriter();
-
 		header.write("<!DOCTYPE html>\n");
 		header.write("<html lang=\"en\">\n");
-		header.write("<head><title>Git Recommender</title>\n");
-		header.write("<meta charset=\"utf-8\">\n");
-		header.write("<link rel=\"stylesheet\" href=\"http://maxcdn.bootstrapcdn.com/bootswatch/3.3.4/paper/bootstrap.min.css\">");
-		header.write("<link rel=\"stylesheet\" href=\"gitrecstyle.css\"></head>\n");
-		header.write("<body>\n");
+        header.write("<head><title>Git Recommender</title>\n");
+        header.write("<meta charset=\"utf-8\">\n");
+        header.write("<script src=\"https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js\"></script>");
+        header.write("<link rel=\"stylesheet\" href=\"http://maxcdn.bootstrapcdn.com/bootswatch/3.3.4/paper/bootstrap.min.css\"></head>\n");
+        header.write("<body>\n");
 
 		return header.toString();
 	}
@@ -38,51 +128,59 @@ public class WebRequest extends HttpServlet {
 
 		footer.write("<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js\"></script>");
 		footer.write("<script src=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js\"></script>");
-		footer.write("<script src=\"masonry.pkgd.min.js\"></script>");
-		footer.write("<script src=\"MasonryContainer.js\"></script>");
-
 		footer.write("</body></html>");
 
 		return footer.toString();
 	}
 
-	public String createLink(String linkName, String linkUrl, int priority) {
-		/*
-		 * <button type="button"
-		 * class="btn btn-success btn-lg btn-block">" + linkName + "</button>
-		 */
-
-		if (priority == 1) {
-			return ("<div class=\"span12\"><div class=\"item\"><a href='"
-					+ linkUrl
-					+ "'><button type=\"button\" class=\"btn btn-success btn-lg btn-block\">"
-					+ linkName + "</button>" + "</a></div></div><!--<a class=text-center href= + linkUrl + > + linkName + </a>-->");
-		} else if (priority == 2) {
-			return ("<div class=\"span10\"><div class=\"item\"><a href='"
-					+ linkUrl
-					+ "'><button type=\"button\" class=\"btn btn-success btn-lg btn-block\">"
-					+ linkName + "</button>" + "</a></div></div><!--<a class=text-center href= + linkUrl + > + linkName + </a>-->");
-		} else if (priority == 3) {
-			return ("<div class=\"span8\"><div class=\"item\"><a href='"
-					+ linkUrl
-					+ "'><button type=\"button\" class=\"btn btn-success btn-lg btn-block\">"
-					+ linkName + "</button>" + "</a></div></div><!--<a class=text-center href= + linkUrl + > + linkName + </a>-->");
-		} else if (priority == 4) {
-			return ("<div class=\"span6\"><div class=\"item\"><a href='"
-					+ linkUrl
-					+ "'><button type=\"button\" class=\"btn btn-success btn-lg btn-block\">"
-					+ linkName + "</button>" + "</a></div></div><!--<a class=text-center href= + linkUrl + > + linkName + </a>-->");
-		} else if (priority == 5) {
-			return ("<div class=\"span4\"><div class=\"item\"><a href='"
-					+ linkUrl
-					+ "'><button type=\"button\" class=\"btn btn-success btn-lg btn-block\">"
-					+ linkName + "</button>" + "</a></div></div><!--<a class=text-center href= + linkUrl + > + linkName + </a>-->");
-		} else {
-			return ("<div class=\"item\"><a href='"
-					+ linkUrl
-					+ "'><button type=\"button\" class=\"btn btn-success btn-lg btn-block\">"
-					+ linkName + "</button>" + "</a></div><!--<a class=text-center href= + linkUrl + > + linkName + </a>-->");
+	public String createDropdown(Repository repository, String id, String[] keywords) throws FileNotFoundException, IOException {
+		String html = "";
+		html += "<div class=\"panel panel-default\">";
+		html += "<div class=\"panel-heading\" role=\"tab\" id=\"heading" + id + "\">";
+		html += "<h4 class=\"panel-title\">";
+		html += "<a data-toggle=\"collapse\" data-parent=\"#accordion\" href=\"#" + id + "\" aria-expanded=\"true\" aria-controls=\"" + id + "\">" + repository.getName() + "</a>";
+		html += "</h4>";
+		html += "</div>";
+		html += "<div id=\"" + id + "\" class=\"panel-collapse collapse in\" role=\"tabpanel\" aria-labelledby=\"heading" + id + "\">";
+		html += "<div class=\"panel-body\">";
+		html += "<div class='col-md-12'>";
+		
+		// chart
+		html += "<div class='col-md-6'>";
+		html += "<h5 class='text-center'>Language Breakdown</h5>";
+		html += "\n<canvas id=\"" + id + "Chart\" width='220' height='220'></canvas>\n";
+		html += makeDonutChart(Recommender.computeLanguageRank(repository), id + "Chart");
+		html += "</div>";
+		
+		// other stuff
+		html += "<div class='col-md-6'>";
+		html += "<h4>Score: " + repository.getRecommenderScore() + "</h4>";
+		
+		boolean[] matched = repository.getKeywordsMatched();
+		for(int i = 0; i < 5; i++) {
+			if(matched[i]) { html += "<p>" + keywords[i] + "<span style='margin-left: 5%; color: green;' class ='glyphicon glyphicon-ok'></span></p>"; }
+			else { html += "<p>" + keywords[i] + "<span style='margin-left: 5%; color: red;' class ='glyphicon glyphicon-remove'></span></p>"; }
 		}
+		
+		html += "</div>";
+		html += "</div>";
+		html += "</div>";
+		html += "</div>";
+		html += "</div>";
+		return html;
+	}
+	
+	public String createLink(String linkName, String linkUrl, int priority) {
+		return ("<div class=\"item\"><a href='"
+				+ linkUrl
+				+ "'><button type=\"button\" class=\"btn btn-success btn-lg btn-block dropdown-toggle\" type=\"button\" id=\"menu1\" data-toggle=\"dropdown\">"
+				+ linkName
+				+ "<span class=\"caret\"></span></button>"
+				+ "</a><ul class=\"dropdown-menu\" role=\"menu\" aria-labelledby=\"menu1\"><li role=\"presentation\">"
+				+ "<a role=\"menuitem\" tabindex=\"-1\" href=\"#\">LOLAI</a></li>"
+				+ "<li role=\"presentation\" class=\"divider\"></li>"
+				+ "<li role=\"presentation\"><a role=\"menuitem\" tabindex=\"-1\" href=\""
+				+ linkUrl + "\">View on GitHub</a></li></div>");
 	}
 
 	public String returnFormFieldWithLabel(String formIdentifier,

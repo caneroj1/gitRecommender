@@ -1,5 +1,6 @@
 package gitrecommender;
 
+import java.text.DecimalFormat;
 import java.util.Date;
 import java.util.HashMap;
 
@@ -21,11 +22,15 @@ import org.javalite.activejdbc.Model;
  * 
  * CLASS VARIABLES
  * ----------
- * keywordsScore: 	the numerical value assigned to the repository that ranks how its readme's 
- * 					content matches up to the user's specified keywords
- */
+ * keywordsScore: 		the numerical value assigned to the repository that ranks how its readme's 
+ * 						content matches up to the user's specified keywords
+ * recommenderScore: 	the score of this repository from the nearest neighbor algorithm.
+ * keywordsMatched: 	for each keyword, a boolean value of whether that keyword was found in the readme or not
+*/
 public class Repository extends Model {
 	private int keywordsScore = 0;
+	private int recommenderScore = 0;
+	private boolean[] keywordsMatched;
 
 	public HashMap<String, String> getLanguages() {
 		return ((HashMap<String, String>) this.get("languages"));
@@ -57,5 +62,22 @@ public class Repository extends Model {
 
 	public int getKeywordsScore() {
 		return keywordsScore;
+	}
+	
+	public boolean[] getKeywordsMatched() {
+		return keywordsMatched;
+	}
+
+	public void setKeywordsMatched(boolean[] keywordsMatched) {
+		this.keywordsMatched = keywordsMatched;
+	}
+	
+	public String getRecommenderScore() {
+		DecimalFormat formatter = new DecimalFormat("0.00");
+		return (formatter.format(recommenderScore/400.0));
+	}
+
+	public void setRecommenderScore(int recommenderScore) {
+		this.recommenderScore = recommenderScore;
 	}
 }
