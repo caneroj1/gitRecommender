@@ -2,7 +2,7 @@ gitRecommender
 ==============
 gitRecommender Final project for Artificial Intelligence. It is a recommender system that will suggest github repositories you might be interested in.
 
->**Our compiled project can be accessed at: http://45.56.104.253:8080/gitrecommender-11**
+>**Our compiled project can be accessed at: ~~http://45.56.104.253:8080/gitrecommender-11~~**
 
 -------------
 
